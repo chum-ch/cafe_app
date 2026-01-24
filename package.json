@@ -11,11 +11,14 @@
   "dependencies": {
     "@primeuix/themes": "^2.0.3",
     "@primevue/forms": "^4.5.4",
+    "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
+    "lucide-vue-next": "^0.563.0",
     "pinia": "^3.0.4",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
     "primevue": "^4.5.4",
+    "tailwindcss": "^4.1.18",
     "vue": "^3.5.26",
     "vue-router": "^4.6.4"
   },
