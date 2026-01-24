@@ -35,12 +35,12 @@ const fullMenu = {
 
 <template>
   <!-- <RouterView /> -->
-  <div class="flex h-screen bg-slate-100 overflow-hidden">
+  <div class="flex h-screen overflow-hidden">
     <Sidebar/>
 
     <main class="flex-1 overflow-auto">
       <div class="relative">
-        <header class=" shadow h-16 flex items-center px-6 sticky top-0 left-0 right-0 z-10 blur-backdrop-filter backdrop-blur-sm">
+        <header class="blur-bg shadow h-16 flex items-center px-6 sticky top-0 left-0 right-0 z-10">
           <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
         </header>
         <div class="p-6">
@@ -57,6 +57,10 @@ const fullMenu = {
 </template>
 
 <style scoped>
+.blur-bg {
+  background-color: rgba(255, 255, 255, 0.35); /* Translucent white */
+  backdrop-filter: blur(12px); /* Strong blur for frosted glass look */
+}
 nav a.router-link-exact-active {
   color: var(--color-text);
 }

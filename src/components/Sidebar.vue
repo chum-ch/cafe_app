@@ -6,11 +6,13 @@ import {
   Users, 
   Box, 
   Settings, 
-  ChevronRight, 
+  ChevronRight,
+  CircleArrowRight,
+  CircleArrowLeft,
   ChevronLeft, 
   Coffee, 
   LayoutDashboard,
-  Circle
+  Circle,
 } from 'lucide-vue-next';
 
 // State
@@ -103,7 +105,7 @@ const getTooltip = (label) => {
     <div class="h-20 flex items-center px-4 border-b border-slate-700/50 overflow-hidden whitespace-nowrap">
       <div class="flex items-center gap-3 min-w-max">
         <div class="w-10 h-10 bg-indigo-500 p-2 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-          <Coffee :size="24" />
+        <Coffee :size="24"/>
         </div>
         
         <div 
@@ -142,7 +144,7 @@ const getTooltip = (label) => {
               v-if="item.children" 
               :size="16" 
               class="transition-transform duration-300"
-              :class="{ 'rotate-90': expandedMenus[item.key] }"
+              :class="{ 'rotate-45': expandedMenus[item.key] }"
             />
           </div>
         </div>
@@ -154,7 +156,7 @@ const getTooltip = (label) => {
             !isCollapsed && expandedMenus[item.key] ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
           ]"
         >
-          <ul class="py-2 space-y-1">
+          <ul class="ml-4 py-2 space-y-1">
             <li v-for="child in item.children" :key="child.label">
               <router-link 
                 :to="child.route"
