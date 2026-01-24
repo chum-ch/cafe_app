@@ -8,7 +8,8 @@ const activeLabels = ref('Dashboard');
 const listUsers = async () => {
   try {
     // users.value = (await $api.user.listUsers()).data;
-    // console.log("Users:", users.value);}
+    // console.log("Users:", users.value);
+  }
   catch (error) {
     console.error("Error list users", error);
   } finally {
