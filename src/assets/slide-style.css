@@ -1,0 +1,139 @@
+.style-elegant-rise {
+  animation: elegantRise 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes elegantRise {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+    filter: blur(4px);
+    /* Adds a professional camera-focus effect */
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.style-soft-pop {
+  animation: softPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes softPop {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.5);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reveal-container {
+  overflow: hidden;
+  /* Important: parent must have this */
+}
+
+.style-reveal-up {
+  animation: revealUp 1s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+@keyframes revealUp {
+  0% {
+    transform: translateY(100%);
+  }
+
+  100% {
+    transform: translateY(0%);
+  }
+}
+
+/* Next: Content comes from the right and scales up */
+.style-animate-next {
+  animation: nextIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Back: Content comes from the left and scales up */
+.style-animate-back {
+  animation: backIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes nextIn {
+  from {
+    opacity: 0;
+    transform: translateX(50px) scale(0.95);
+    filter: blur(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes backIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50px) scale(0.95);
+    filter: blur(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.style-glass-next {
+  animation: glassNext 0.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.style-glass-back {
+  animation: glassBack 0.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes glassNext {
+  0% {
+    opacity: 0;
+    transform: translateX(30px) skewX(-5deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) skewX(0deg);
+  }
+}
+
+@keyframes glassBack {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px) skewX(5deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) skewX(0deg);
+  }
+}
+
+.style-slide-up {
+  animation: slideUp 0.8s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

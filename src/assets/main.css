@@ -1,11 +1,12 @@
+@import './slide-style.css';
 @import './base.css';
 @import "tailwindcss";
+
 #app {
   font-weight: normal;
-  /* Using a subtle gradient overlay so the text remains readable over the image */
-  background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), 
+  /* background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), 
               url('/imgs/bg1.png') no-repeat center center;
-  background-size: cover;
+  background-size: cover; */
 }
 
 a,

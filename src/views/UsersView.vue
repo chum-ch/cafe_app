@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <div class="style-glass-back">
     <h1>This is an users page</h1>
     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse quidem cumque, atque, commodi quas eveniet neque natus id dolorem blanditiis quo exercitationem tempore hic quia repudiandae vero, sit adipisci temporibus?
     Esse quisquam nulla cum sed, earum temporibus. Voluptatum, incidunt. Voluptas, libero voluptatibus. Deleniti veniam veritatis ut atque debitis nisi voluptatibus, commodi voluptatem quia soluta repudiandae ad mollitia! Ex, dignissimos sequi.

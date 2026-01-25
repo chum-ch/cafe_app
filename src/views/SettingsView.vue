@@ -1,5 +1,5 @@
 <template>
-  <div class="about">
+  <div class="style-glass-back">
     <h1>This is an setting page</h1>
   </div>
 </template>

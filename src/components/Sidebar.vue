@@ -79,6 +79,7 @@ const handleMenuClick = (item) => {
     // Standard navigation
     router.push(item.route);
   }
+
 };
 
 // Check if a route is active (including sub-routes)
