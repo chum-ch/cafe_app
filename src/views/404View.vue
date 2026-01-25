@@ -1,4 +1,5 @@
 <script setup>
+import IconBack from '@/components/icons/IconBack.vue';
 import { useRouter } from 'vue-router';
 
 // Senior tip: Props make this component reusable for different "Not Found" scenarios
@@ -42,7 +43,7 @@ const goHome = () => {
             @click="goHome"
             class="bg-indigo-600 font-serif text-white px-4 py-2 rounded-lg shadow-md shadow-indigo-900/20 hover:bg-indigo-700 hover:shadow-indigo-800/30"
           >
-            Go to Home
+          <IconBack class="" />Go to Home
           </PriButton>
         </div>
 
@@ -54,7 +55,7 @@ const goHome = () => {
 <style scoped>
 
 .four_zero_four_bg {
-  /* It is safer to host this image locally in /public/imgs/404.gif */
+  /* https://cdn.dribbble.com/users/722246/screenshots/3066818/404-page.gif */
   background-image: url('/imgs/404.gif');
   background-size: contain;
 }

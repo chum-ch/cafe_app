@@ -43,7 +43,7 @@ const fullMenu = {
         <header class="blur-bg shadow h-16 flex items-center px-6 sticky top-0 left-0 right-0 z-10">
           <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
         </header>
-        <div class="p-6">
+        <div class="p-6 text-justify">
           <router-view v-slot="{ Component }">
             <transition name="fade" mode="out-in">
               <component :is="Component" />
