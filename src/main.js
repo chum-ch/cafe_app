@@ -39,7 +39,11 @@ import Skeleton from 'primevue/skeleton';
 import Textarea from "primevue/textarea";
 import MultiSelect from 'primevue/multiselect';
 import Select from 'primevue/select';
+import Divider from 'primevue/divider';
 
+import OtpForm from './components/icons/OtpForm.vue';
+import SetAndResetPwd from './components/forms/SetAndResetPwdForm.vue';
+// Custome component
 // Create Vue App
 const app = createApp(App)
 
@@ -66,6 +70,11 @@ app.component('PriSkeleton', Skeleton);
 app.component('PriTextarea', Textarea);
 app.component('PriMultiSelect', MultiSelect);
 app.component('PriSelect', Select);
+app.component('PriDivider', Divider)
+
+
+app.component('OtpForm', OtpForm)
+app.component('SetAndResetPwd', SetAndResetPwd)
 
 app.provide("$api", API(axios));
 // app.use(PrimeVue, {

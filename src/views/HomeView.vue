@@ -1,6 +1,13 @@
 <script setup>
+
 </script>
 
 <template>
-  <h1 class="text-center">Welcome to the Cafe App!</h1>
+  <div class="home">
+    <h1> This is home page.</h1>
+
+  </div>
+
 </template>
+<style scoped>
+</style>

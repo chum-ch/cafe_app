@@ -5,10 +5,26 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      path: '/login',
       name: 'login',
-      component: () => import('../components/Login.vue'),
+      component: () => import('../components/forms/LoginForm.vue'),
     },
+    {
+      path: '/register',
+      name: 'register',
+      component: () => import('../components/forms/RegisterForm.vue')
+    },
+    {
+      path: '/email',
+      name: 'email',
+      component: () => import('../components/forms/EmailForm.vue')
+    },
+    {
+      path: '/set-password',
+      name: 'set-password',
+      component: () => import('../components/forms/SetAndResetPwdForm.vue')
+    },
+
     {
       path: '/home',
       name: 'home',
