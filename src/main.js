@@ -43,6 +43,7 @@ import Divider from 'primevue/divider';
 
 import OtpForm from './components/icons/OtpForm.vue';
 import SetAndResetPwd from './components/forms/SetAndResetPwdForm.vue';
+import IconCafe from './components/icons/IconCafe.vue';
 // Custome component
 // Create Vue App
 const app = createApp(App)
@@ -75,6 +76,7 @@ app.component('PriDivider', Divider)
 
 app.component('OtpForm', OtpForm)
 app.component('SetAndResetPwd', SetAndResetPwd)
+app.component('IconCafe', IconCafe)
 
 app.provide("$api", API(axios));
 // app.use(PrimeVue, {

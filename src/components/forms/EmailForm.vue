@@ -1,5 +1,5 @@
 <template>
-  <div class="login-container flex items-center justify-center rounded-xl border border-white/10">
+  <div class="login-container flex items-center justify-center rounded-xl">
     <PriToast />
     <div class="form shadow-2xl rounded-xl">
       <div class="text-center mb-6">

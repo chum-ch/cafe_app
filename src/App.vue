@@ -2,6 +2,11 @@
 import { RouterLink, RouterView } from 'vue-router'
 import Sidebar from './components/Sidebar.vue';
 import { inject, onMounted, ref } from "vue";
+import MainCafe from './components/MainCafe.vue';
+import HeaderView from './views/HeaderView.vue';
+import BodyView from './views/BodyView.vue';
+import FooterView from './views/FooterView.vue';
+
 const $api = inject("$api");
 const users = ref([]);
 const activeLabels = ref('Dashboard');
@@ -35,7 +40,9 @@ const fullMenu = {
 
 <template>
   <!-- <RouterView /> -->
-  <div class="flex h-screen overflow-hidden">
+
+  <!-- <TheWelcomeCafe/>
+  <div class="flex h-screen overflow-hidden" >
     <Sidebar/>
 
     <main class="flex-1 overflow-auto">
@@ -53,14 +60,28 @@ const fullMenu = {
 
       </div>
     </main>
-  </div>
+  </div> -->
+  <MainCafe>
+    <template #header>
+      <HeaderView />
+    </template>
+    <template #body>
+      <BodyView />
+    </template>
+    <template #footer>
+      <FooterView />
+    </template>
+  </MainCafe>
 </template>
 
 <style scoped>
 .blur-bg {
-  background-color: rgba(255, 255, 255, 0.35); /* Translucent white */
-  backdrop-filter: blur(12px); /* Strong blur for frosted glass look */
+  background-color: rgba(255, 255, 255, 0.35);
+  /* Translucent white */
+  backdrop-filter: blur(12px);
+  /* Strong blur for frosted glass look */
 }
+
 nav a.router-link-exact-active {
   color: var(--color-text);
 }

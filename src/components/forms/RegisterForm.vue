@@ -58,7 +58,7 @@ const initialValues = reactive({
   email: "",
 });
 
-const toggleMode = () => router.push('/login');
+const toggleMode = () => router.push('/');
 const resolver = zodResolver(
   z.object({
     brandName: z.string().min(1, "Brand name is required."),
