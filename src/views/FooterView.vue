@@ -18,11 +18,11 @@ import { Coffee, Mail, Phone, Heart } from 'lucide-vue-next';
       </div>
 
       <div class="flex gap-3 text-sm">
-        <a href="#" class="flex items-center gap-2 hover:text-white transition-colors">
+        <a href="mailto:yoeurnchum@gmail.com" class="flex items-center gap-2 hover:text-white transition-colors">
           <Mail class="w-4 h-4" />
           <span>Support</span>
         </a>
-        <a href="#" class="flex items-center gap-2 hover:text-white transition-colors">
+        <a href="tel:0968785411" class="flex items-center gap-2 hover:text-white transition-colors">
           <Phone class="w-4 h-4" />
           <span>Hotline</span>
         </a>

@@ -1,45 +1,3 @@
-<template>
-  <div class="login-container flex items-center justify-center rounded-xl">
-    <PriToast />
-    <div class="form shadow-2xl rounded-xl">
-      <div class="text-center mb-6">
-        <IconCafe class="text-center w-full" :size="100" :color="'#6F4E37'" />
-        <h2 class="text-2xl font-bold text-slate-800">Create an account</h2>
-        <p class="text-slate-500 text-sm">Start your brewing journey with us</p>
-      </div>
-      <Form v-slot="$form" :initialValues="initialValues" :resolver="resolver" :validateOnValueUpdate="true"
-        :validateOnBlur="true" @submit="onFormSubmit" class="flex flex-wrap w-full">
-        <div class="col-12">
-          <PriInputText name="brandName" type="text" placeholder="Brand name*" fluid
-            :class="{ 'p-invalid': $form?.brandName?.invalid }" />
-          <PriMessage v-if="$form?.brandName?.invalid" severity="error" size="small" variant="simple">
-            {{ $form.brandName.error.message }}
-          </PriMessage>
-        </div>
-        <div class="col-12">
-          <PriInputText name="email" type="text" placeholder="Email*" fluid
-            :class="{ 'p-invalid': $form?.email?.invalid }" />
-          <PriMessage v-if="$form?.email?.invalid" severity="error" size="small" variant="simple">
-            {{ $form.email.error.message }}
-          </PriMessage>
-        </div>
-
-        <div class="col-12">
-          <PriButton type="submit" severity="primary" label="Register" :loading="isSubmitting" icon="pi pi-user-plus"
-            :style="!$form.valid ? { cursor: 'not-allowed' } : ''" :disabled="!$form.valid"
-            class="mt-2 col-12 style-slide-up" />
-        </div>
-        <div class="text-center col-12">
-          <p class="text-sm text-slate-600">
-            Already have an account?
-            <span class="text-primary cursor-pointer hover:underline font-medium bg-green" @click="toggleMode">Login
-            </span>
-          </p>
-        </div>
-      </Form>
-    </div>
-  </div>
-</template>
 <script setup>
 import { ref, reactive } from "vue";
 import { Form } from "@primevue/forms";
@@ -58,13 +16,19 @@ const initialValues = reactive({
   email: "",
 });
 
-const toggleMode = () => router.push('/');
+const goToLogin = () => router.push('/login');
 const resolver = zodResolver(
   z.object({
     brandName: z.string().min(1, "Brand name is required."),
     email: z.string().min(1, "Email is required").email("Please enter a valid email address."),
   })
 );
+
+const handleRegister = async () => {
+  await api.post('/v1/auth/register', { email: email.value });
+  onboarding.setRegistrationData(2, email.value); // Unlock Step 2
+  router.push('/email');
+};
 
 const onFormSubmit = async (e) => {
   if (!e.valid) return;
@@ -95,16 +59,104 @@ const onFormSubmit = async (e) => {
 };
 </script>
 
+<template>
+  <div class="register-container flex items-center justify-center min-h-screen p-4 bg-slate-50">
+    <PriToast />
+    
+    <div class="form shadow-2xl rounded-xl w-full max-w-[450px] transition-all duration-300">
+      <div class="text-center mb-6">
+        <IconCafe class="mx-auto mb-3" :size="80" :color="'#6F4E37'" />
+        <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Create an account</h2>
+        <p class="text-slate-500 text-sm px-4">Start your brewing journey with us</p>
+      </div>
+
+      <Form 
+        v-slot="$form" 
+        :initialValues="initialValues" 
+        :resolver="resolver" 
+        :validateOnValueUpdate="true"
+        :validateOnBlur="true" 
+        @submit="onFormSubmit" 
+        class="flex flex-col gap-4 w-full"
+      >
+        <div class="flex flex-col gap-1">
+          <PriInputText 
+            name="brandName" 
+            type="text" 
+            placeholder="Brand name*" 
+            fluid
+            :class="{ 'p-invalid': $form?.brandName?.invalid }" 
+          />
+          <PriMessage v-if="$form?.brandName?.invalid" severity="error" size="small" variant="simple">
+            {{ $form.brandName.error.message }}
+          </PriMessage>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <PriInputText 
+            name="email" 
+            type="text" 
+            placeholder="Email*" 
+            fluid
+            :class="{ 'p-invalid': $form?.email?.invalid }" 
+          />
+          <PriMessage v-if="$form?.email?.invalid" severity="error" size="small" variant="simple">
+            {{ $form.email.error.message }}
+          </PriMessage>
+        </div>
+
+        <div class="mt-2">
+          <PriButton 
+            type="submit" 
+            severity="primary" 
+            label="Register" 
+            :loading="isSubmitting" 
+            icon="pi pi-user-plus"
+            :disabled="!$form.valid"
+            :style="!$form.valid ? { cursor: 'not-allowed' } : ''"
+            class="style-slide-up w-full text-lg font-semibold shadow-md transition-transform active:scale-95" 
+          />
+        </div>
+
+        <div class="text-center">
+          <p class="text-sm text-slate-600">
+            Already have an account?
+            <span 
+              class="text-primary cursor-pointer hover:underline font-bold ml-1" 
+              @click="goToLogin"
+            >
+              Login
+            </span>
+          </p>
+        </div>
+      </Form>
+    </div>
+  </div>
+</template>
+
 <style scoped>
 .form {
-  width: 40%;
-  background: url('/imgs/bg3.png') no-repeat center center;
+  /* Using a white overlay (0.92 opacity) to ensure inputs are readable over the background image */
+  background: linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)), 
+              url('/imgs/bg3.png') no-repeat center center;
   background-size: cover;
-  padding: 2rem;
+  padding: 1.5rem; /* Compact padding for mobile */
 }
 
-/* Red border for input when invalid */
+/* On screens larger than small (640px), increase padding for a spacious feel */
+@media (min-width: 640px) {
+  .form {
+    padding: 3rem 2.5rem;
+  }
+}
+
 :deep(.p-invalid) {
   border-color: #ef4444 !important;
+  background-color: #fffafb !important;
+}
+
+/* Smooth transition for the submit button */
+.p-button {
+  transition: all 0.2s ease;
 }
 </style>

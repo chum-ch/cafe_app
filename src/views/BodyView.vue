@@ -46,11 +46,11 @@ const features = [
 // --- Data: Dev Team ---
 const team = [
   {
-    name: 'System Architect',
-    role: 'Owner & Lead Dev',
+    name: 'Chum YOEURN',
+    role: 'Tech Lead, backend engineer',
     desc: 'Building the backbone of modern cafe operations.',
     icon: Code,
-    img: ''
+    img: '/imgs/c10x15.jpg'
   },
   {
     name: 'UX Specialist',
@@ -69,15 +69,15 @@ const handleRegister = () => router.push({ name: 'register' });
 <template>
   <div class="img-bg min-h-screen flex flex-col font-sans text-slate-800 bg-white">
     <main class="flex-grow">
-      <section class="relative pt-20 pb-24 overflow-hidden from-amber-50 via-white to-white">
+      <section class="relative my-5 overflow-hidden from-amber-50 via-white to-white">
         <div class="max-w-5xl mx-auto px-6 text-center">
-          <span
-            class="style-elegant-rise inline-block py-1.5 px-4 rounded-full bg-amber-100/50 text-amber-700 text-sm font-semibold mb-6 border border-amber-200">
+          <!-- <span
+            class="inline-block py-1.5 px-4 rounded-full bg-amber-100/50 text-amber-700 text-sm font-semibold mb-6 border border-amber-200">
             Version 2.0 Now Live
-          </span>
-          <h1 class="text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6 text-balance">
-            Brew Success with <br />
-            <span class="bg-clip-text text-amber-600 from-amber-200 to-orange-600">
+          </span> -->
+          <h1 class="text-4xl subpixel-antialiased md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6">
+            Brew Success with <br/>
+            <span class="text-3xl bg-clip-text text-amber-600 from-amber-200 to-orange-600">
               Intelligent Management
             </span>
           </h1>
@@ -86,7 +86,7 @@ const handleRegister = () => router.push({ name: 'register' });
             unified workflow.
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mx-auto p-4 flex justify-center">
-            <PriButton label="Log In" icon="pi pi-sign-in"
+            <PriButton label="Log In" icon="pi pi-sign-in" @click="handleLogin"
               class="style-animate-back hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
             </PriButton>
 
@@ -130,12 +130,15 @@ const handleRegister = () => router.push({ name: 'register' });
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div v-for="(dev, idx) in team" :key="idx"
-              class="flex items-start gap-5 p-3 rounded-2xl border border-slate-700 hover:bg-slate-800 transition-colors">
-              <div class="rounded-lg text-amber-400">
-                <div class="img">
-                  <img :src="dev.img || './placehoder-img.svg'" alt="" class="rounded">
+              class="group flex items-start gap-5 p-3 rounded-2xl border border-slate-700 hover:bg-slate-800 transition-colors">
+
+              <div class="rounded-lg overflow-hidden shrink-0 w-24 h-24">
+                <div class="img h-full w-full">
+                  <img :src="dev.img || './placeholder.svg'"
+                    class="w-full transition duration-500 group-hover:scale-115">
                 </div>
               </div>
+
               <div>
                 <h4 class="text-xl font-bold text-white">{{ dev.name }}</h4>
                 <p class="text-xs font-semibold tracking-wider text-amber-500 uppercase mb-2">{{ dev.role }}</p>
@@ -143,6 +146,7 @@ const handleRegister = () => router.push({ name: 'register' });
               </div>
             </div>
           </div>
+
         </div>
       </section>
     </main>
@@ -157,6 +161,7 @@ const handleRegister = () => router.push({ name: 'register' });
 .img {
   width: 100px;
   height: 100px;
+  object-fit: contain;
 }
 
 .img-bg {

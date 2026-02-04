@@ -9,7 +9,8 @@ import {
   ChevronRight,
   CircleArrowRight,
   CircleArrowLeft,
-  ChevronLeft, 
+  ChevronsLeft, 
+  ChevronsRight,
   Coffee, 
   LayoutDashboard,
   Circle,
@@ -178,13 +179,14 @@ const getTooltip = (label) => {
       </div>
     </nav>
 
-    <div class="p-4 border-t border-slate-700/50">
+    <div class="absolute right-0 mt-7">
       <button 
         @click="toggleSidebar"
-        class="w-full flex items-center justify-center h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+        title="Toggle Sidebar"
+        class="w-full flex items-center text-primary justify-center  transition-colors bg-white p-1 shadow-lg"
       >
         <component 
-          :is="isCollapsed ? ChevronRight : ChevronLeft" 
+          :is="isCollapsed ? ChevronsRight : ChevronsLeft" 
           :size="20" 
         />
       </button>
@@ -204,5 +206,9 @@ nav::-webkit-scrollbar-track {
 nav::-webkit-scrollbar-thumb {
   background-color: #334155;
   border-radius: 20px;
+}
+button { 
+  border-radius: 5px 0px 0px 5px;
+  cursor: pointer;
 }
 </style>

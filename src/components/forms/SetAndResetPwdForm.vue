@@ -73,108 +73,117 @@ const onFormSubmit = async (e) => {
     }
 };
 </script>
-
 <template>
-    <div class="pwd-card shadow-lg rounded-xl">
+    <div class="set-pwd-container flex items-center justify-center min-h-[90vh] p-4 sm:p-6">
+        <PriToast />
 
-        <Transition name="view-flip" mode="out-in">
-            <div v-if="isSuccess" class="text-center py-6 success-view">
-                <div class="success-circle">
-                    <i class="pi pi-check text-5xl"></i>
-                </div>
-                <h2 class="text-2xl font-bold mt-4 text-slate-800">Security Updated</h2>
-                <p class="text-slate-500">Redirecting you to login...</p>
-            </div>
-
-            <div v-else>
-                <div class="header-box">
-                    <IconAnimatedKey />
-                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Security Settings</h2>
-                    <p class="text-slate-500 text-sm">{{ isForgotPwd ? 'Reset your forgotten password' : 'Create a secure password' }}</p>
+        <div class="pwd-card shadow-2xl rounded-2xl w-full max-w-[450px] transition-all duration-300">
+            <Transition name="view-flip" mode="out-in">
+                <div v-if="isSuccess" class="text-center py-8 success-view">
+                    <div class="success-circle">
+                        <i class="pi pi-check text-4xl md:text-5xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mt-6 text-slate-800">Security Updated</h2>
+                    <p class="text-slate-500 mt-2">Redirecting you to login...</p>
                 </div>
 
-                <Form v-slot="$form" :resolver="zodResolver(schema)" :initialValues="formData" @submit="onFormSubmit"
-                    class="flex flex-col gap-5">
+                <div v-else>
+                    <div class="header-box flex flex-col items-center mb-4">
+                        <IconAnimatedKey class="mb-2" />
+                        <h2 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Security Settings</h2>
+                        <p class="text-slate-500 text-sm text-center px-4">
+                            {{ isForgotPwd ? 'Reset your forgotten password' : 'Create a secure password' }}
+                        </p>
+                    </div>
 
-                    <div class="flex flex-col gap-2">
-                        <div class="flex justify-between items-end">
-                            <label class="text-sm font-bold text-slate-600">New Password</label>
-                            <span class="text-xs font-mono"
-                                :class="strength === 100 ? 'text-green-500' : 'text-slate-400'">{{ Math.round(strength)
-                                }}%</span>
-                        </div>
-                        <PriPassword name="NewPassword" v-model="formData.NewPassword" toggleMask fluid
-                            :feedback="false" placeholder="New Password" class="premium-input" />
+                    <Form v-slot="$form" :resolver="zodResolver(schema)" :initialValues="formData"
+                        @submit="onFormSubmit" class="flex flex-col gap-3">
+                        <div class="flex flex-col gap-2">
+                            <div class="flex justify-between items-end mb-1">
+                                <label class="text-sm font-bold text-slate-600">New Password</label>
+                                <span class="text-xs font-mono font-bold"
+                                    :class="strength === 100 ? 'text-green-500' : 'text-slate-400'">
+                                    {{ Math.round(strength) }}%
+                                </span>
+                            </div>
 
-                        <div class="strength-bar-container">
-                            <div class="strength-fill"
-                                :style="{ width: strength + '%', background: strength < 50 ? '#ef4444' : strength < 100 ? '#f59e0b' : '#22c55e' }">
+                            <PriPassword name="NewPassword" v-model="formData.NewPassword" toggleMask fluid
+                                :feedback="false" placeholder="New Password" class="premium-input" />
+
+                            <div class="strength-bar-container">
+                                <div class="strength-fill"
+                                    :style="{ width: strength + '%', background: strength < 50 ? '#ef4444' : strength < 100 ? '#f59e0b' : '#22c55e' }">
+                                </div>
+                            </div>
+
+                            <div
+                                class="grid grid-cols-1 xs:grid-cols-2 gap-x-4 gap-y-2 mt-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <div v-for="req in requirements" :key="req.label"
+                                    class="flex items-center gap-2 text-[11px] sm:text-[12px] transition-colors duration-300"
+                                    :class="req.met ? 'text-green-600 font-medium' : 'text-slate-400'">
+                                    <i :class="req.met ? 'pi pi-check-circle' : 'pi pi-circle'" class="text-[10px]"></i>
+                                    {{ req.label }}
+                                </div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-2 mt-1">
-                            <div v-for="req in requirements" :key="req.label"
-                                class="flex items-center gap-2 text-[10px]"
-                                :class="req.met ? 'text-green-600' : 'text-slate-400'">
-                                <i :class="req.met ? 'pi pi-check-circle' : 'pi pi-circle'" class="text-[9px]"></i>
-                                {{ req.label }}
-                            </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-slate-600">Confirm Password</label>
+                            <PriPassword name="ConfirmPassword" v-model="formData.ConfirmPassword" :feedback="false"
+                                toggleMask fluid placeholder="Confirm Password" class="premium-input" />
+                            <PriMessage v-if="$form.ConfirmPassword?.invalid" severity="error" variant="simple"
+                                size="small">
+                                {{ $form.ConfirmPassword.error?.message }}
+                            </PriMessage>
                         </div>
-                    </div>
 
-                    <div class="flex flex-col gap-2">
-                        <label class="text-sm font-bold text-slate-600">Confirm Password</label>
-                        <PriPassword name="ConfirmPassword" v-model="formData.ConfirmPassword" :feedback="false"
-                            toggleMask fluid placeholder="Confirm Password" class="premium-input" />
-                        <PriMessage v-if="$form.ConfirmPassword?.invalid" severity="error" variant="simple"
-                            size="small">{{ $form.ConfirmPassword.error?.message }}</PriMessage>
-                    </div>
-
-                    <div class="flex flex-col gap-3 mt-2 style-slide-up">
-                        <PriButton type="submit" label="Update Security" :loading="loading" class="update-btn" />
-                        <!-- <PriButton v-if="isShowBackBtn" type="button" label="Cancel" text
-                            class="text-slate-400 hover:text-slate-600" @click="$emit('onBackClick')" /> -->
-                    </div>
-                </Form>
-            </div>
-        </Transition>
+                        <div class="flex flex-col gap-3 mt-3">
+                            <PriButton type="submit" label="Update Security" :loading="loading"
+                                class="update-btn text-lg style-slide-up" :disabled="!$form.valid"
+                                :style="!$form.valid ? { cursor: 'not-allowed' } : ''" />
+                        </div>
+                    </Form>
+                </div>
+            </Transition>
+        </div>
     </div>
 </template>
 
 <style scoped>
 .pwd-card {
-    width: 100%;
-    max-width: 440px;
-    margin: 2rem auto;
-    background: #ffffff;
-    padding: 2.5rem 2rem;
-    border: 1px solid #f1f5f9;
+    /* Using a semi-transparent background overlay so text is readable over the image */
+    background: linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)),
+        url('/imgs/bg3.png') no-repeat center center;
+    background-size: cover;
+    padding: 1.5rem;
+    /* Smaller padding for mobile */
 }
 
-.header-box {
-    text-align: center;
-    margin-bottom: 2rem;
+/* Tablet and Desktop padding increase */
+@media (min-width: 640px) {
+    .pwd-card {
+        padding: 2.5rem 2rem;
+    }
 }
 
 /* Strength Bar */
 .strength-bar-container {
-    height: 4px;
+    height: 6px;
     background: #f1f5f9;
     border-radius: 10px;
     overflow: hidden;
-    margin-top: 4px;
+    margin-top: 6px;
 }
 
 .strength-fill {
     height: 100%;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 
 /* Success View */
 .success-circle {
-    width: 90px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
     background: #22c55e;
     color: white;
     border-radius: 50%;
@@ -182,8 +191,8 @@ const onFormSubmit = async (e) => {
     align-items: center;
     justify-content: center;
     margin: 0 auto;
-    box-shadow: 0 15px 30px rgba(34, 197, 94, 0.3);
-    animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+    animation: scaleUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes scaleUp {
@@ -196,21 +205,5 @@ const onFormSubmit = async (e) => {
         transform: scale(1);
         opacity: 1;
     }
-}
-
-/* Flip Transition */
-.view-flip-enter-active,
-.view-flip-leave-active {
-    transition: all 0.4s ease;
-}
-
-.view-flip-enter-from {
-    opacity: 0;
-    transform: rotateY(20deg) scale(0.95);
-}
-
-.view-flip-leave-to {
-    opacity: 0;
-    transform: rotateY(-20deg) scale(0.95);
 }
 </style>

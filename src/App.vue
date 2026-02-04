@@ -6,10 +6,13 @@ import MainCafe from './components/MainCafe.vue';
 import HeaderView from './views/HeaderView.vue';
 import BodyView from './views/BodyView.vue';
 import FooterView from './views/FooterView.vue';
+import { useSession } from './utils/helperFun';
+import { useAuthStore } from '@/stores/auth';
+import { useOnboardingStore } from '@/stores/onboarding';
 
+const isLogin = useAuthStore().isLoggedIn;
 const $api = inject("$api");
-const users = ref([]);
-const activeLabels = ref('Dashboard');
+
 const listUsers = async () => {
   try {
     // users.value = (await $api.user.listUsers()).data;
@@ -41,32 +44,33 @@ const fullMenu = {
 <template>
   <!-- <RouterView /> -->
 
-  <!-- <TheWelcomeCafe/>
-  <div class="flex h-screen overflow-hidden" >
-    <Sidebar/>
+  <!-- <TheWelcomeCafe/> -->
 
-    <main class="flex-1 overflow-auto">
-      <div class="relative">
-        <header class="blur-bg shadow h-16 flex items-center px-6 sticky top-0 left-0 right-0 z-10">
-          <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
-        </header>
-        <div class="p-6 text-justify">
-          <router-view v-slot="{ Component }">
-            <transition name="fade" mode="out-in">
-              <component :is="Component" />
-            </transition>
-          </router-view>
-        </div>
-
-      </div>
-    </main>
-  </div> -->
   <MainCafe>
     <template #header>
       <HeaderView />
     </template>
     <template #body>
-      <BodyView />
+      <div class="body">
+        <div class="flex h-screen overflow-hidden">
+          <Sidebar v-if="isLogin" />
+          <main class="flex-1 overflow-auto">
+            <div class="relative">
+              <!-- <header class="blur-bg shadow h-16 flex items-center px-6 sticky top-0 left-0 right-0 z-10">
+                <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
+              </header> -->
+              <div class="text-justify">
+                <router-view v-slot="{ Component }">
+                  <transition name="fade" mode="out-in">
+                    <component :is="Component" />
+                  </transition>
+                </router-view>
+              </div>
+
+            </div>
+          </main>
+        </div>
+      </div>
     </template>
     <template #footer>
       <FooterView />
@@ -99,7 +103,6 @@ nav a {
 nav a:first-of-type {
   border: 0;
 }
-
 
 /* --- Smartphones (landscape) and Small Tablets (portrait) --- */
 /* (e.g., min-width of 576px) */

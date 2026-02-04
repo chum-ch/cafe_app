@@ -1,11 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import { useAuthStore } from '@/stores/auth';
+import { useOnboardingStore } from '@/stores/onboarding';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
+      name: 'welcome',
+      component: () => import('@/views/BodyView.vue'),
+    },
+    {
+      path: '/login',
       name: 'login',
       component: () => import('../components/forms/LoginForm.vue'),
     },
@@ -20,15 +26,20 @@ const router = createRouter({
       component: () => import('../components/forms/EmailForm.vue')
     },
     {
+      path: '/verify-otp',
+      name: 'verify-otp',
+      component: () => import('../components/forms/OtpForm.vue')
+    },
+    {
       path: '/set-password',
       name: 'set-password',
       component: () => import('../components/forms/SetAndResetPwdForm.vue')
     },
-
     {
       path: '/home',
       name: 'home',
       component: () => import('../views/HomeView.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/about',
@@ -70,5 +81,30 @@ const router = createRouter({
     },
   ],
 })
+
+router.beforeEach((to, from, next) => {
+  const auth = useAuthStore();
+  const onboarding = useOnboardingStore();
+
+  // 1. Prevent logged-in users from seeing auth pages
+  if (['login', 'register', 'email', 'set-password'].includes(to.name) && auth.isLoggedIn) {
+    return next({ name: 'home' });
+  }
+
+  // 2. Protect Registration Steps (Force sequence)
+  // if (to.name === 'email' && onboarding.stepReached < 2) {
+  //   return next({ name: 'register' });
+  // }
+  // if (to.name === 'set-password' && onboarding.stepReached < 3) {
+  //   return next({ name: 'email' });
+  // }
+
+  // 3. Global Auth Guard for protected pages
+  if (to.meta.requiresAuth && !auth.isLoggedIn) {
+    return next({ name: 'login' });
+  }
+
+  next();
+});
 
 export default router

@@ -41,7 +41,7 @@ import MultiSelect from 'primevue/multiselect';
 import Select from 'primevue/select';
 import Divider from 'primevue/divider';
 
-import OtpForm from './components/icons/OtpForm.vue';
+import OtpForm from './components/forms/OtpForm.vue';
 import SetAndResetPwd from './components/forms/SetAndResetPwdForm.vue';
 import IconCafe from './components/icons/IconCafe.vue';
 // Custome component
