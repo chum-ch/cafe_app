@@ -103,7 +103,7 @@ const onFormSubmit = async (e) => {
         <div class="text-center w-full">
           <span 
             class="text-sm text-primary cursor-pointer hover:underline font-medium"
-            @click="router.back()"
+            @click="router.push('/login')"
           >
             ← Back to Login
           </span>

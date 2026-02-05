@@ -90,7 +90,7 @@ const handleRegister = () => router.push({ name: 'register' });
               class="style-animate-back hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
             </PriButton>
 
-            <PriButton label="Register" icon="pi pi-user-plus" severity="warn"
+            <PriButton label="Register" icon="pi pi-user-plus" severity="warn" @click="handleRegister"
               class=" style-animate-next hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
             </PriButton>
           </div>

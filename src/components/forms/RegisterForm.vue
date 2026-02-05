@@ -94,7 +94,7 @@ const onFormSubmit = async (e) => {
         <div class="text-center">
           <p class="text-sm text-slate-600">
             Already have an account?
-            <span class="text-primary cursor-pointer hover:underline font-bold ml-1" @click="router.back()">
+            <span class="text-primary cursor-pointer hover:underline font-bold ml-1" @click="router.push('/login')">
               Login
             </span>
           </p>
