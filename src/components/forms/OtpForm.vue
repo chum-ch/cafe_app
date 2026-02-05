@@ -4,6 +4,7 @@ import { useToast } from "primevue/usetoast";
 import { Form } from "@primevue/forms";
 import { useRouter } from "vue-router";
 import { useOnboardingStore } from '@/stores/onboarding';
+import { storeToRefs } from 'pinia'; // Import this!
 
 const emit = defineEmits(["onBackClick", "onSuccess"]);
 const props = defineProps({
@@ -15,14 +16,11 @@ const props = defineProps({
 const $api = inject('$api');
 const onboarding = useOnboardingStore();
 const toast = useToast();
+const router = useRouter();
 const loading = ref(false);
 const resendStatus = ref('idle'); // 'idle' | 'loading' | 'success' | 'error'
-const isShowResetPwdForm = ref(false);
-const otpCode = ref('');
-
-const formData = reactive({
-    Passcode: "",
-});
+const emailLogin = storeToRefs(onboarding).email;
+const formData = ref({ Passcode: "" });
 
 // Zod Schema
 const handleResendOTP = async () => {
@@ -30,9 +28,8 @@ const handleResendOTP = async () => {
 
     resendStatus.value = 'loading';
     try {
-        await $api.user.resendOTP(props.additionalData.TenantId, {
-            Email: props.email,
-        });
+        const body = { Email: emailLogin.value };
+        await $api.user.sendEmail(body);
 
         resendStatus.value = 'success';
         toast.add({
@@ -52,45 +49,29 @@ const handleResendOTP = async () => {
 
 const onFormSubmit = async (e) => {
     if (!e.valid) return;
-
     loading.value = true;
+
     try {
-        const payload = { OTP: Number(formData.Passcode) };
-        await $api.user.sendOTP(props.additionalData.TenantId, payload);
+        const payload = {
+            Email: emailLogin.value,
+            OtpCode: Number(formData.value.Passcode)
+        };
+        console.log('payload', payload);
+        const response = await $api.user.verifyOtp(payload);
+        console.log('response', response);
 
-        // Instead of local state, consider emitting the verified data
-        isShowResetPwdForm.value = true;
-        // Example: emit('onSuccess', { email: props.email, code: formData.Passcode });
 
+        // 2. Update Store (Unlock the Set Password route)
+        onboarding.verifySuccess();
+
+        // 3. Route
+        router.push({ name: 'set-password' });
     } catch (error) {
-        toast.add({
-            severity: "error",
-            summary: "Verification Failed",
-            detail: error.response?.data?.message || "Invalid OTP",
-            life: 3000,
-        });
         console.error("Form otp error:", error);
     } finally {
         loading.value = false;
     }
 };
-
-const handleVerify = async () => {
-  try {
-    // 1. Call API /v1/auth/verify-otp
-    // Use onboarding.email to know who we are verifying
-    await $api.auth.verifyOtp({ 
-      email: onboarding.email, 
-      code: otpCode.value 
-    });
-
-    // 2. Update Store (Unlock the Set Password route)
-    onboarding.verifySuccess();
-
-    // 3. Route
-    router.push({ name: 'set-password' });
-  } catch (error) { /* handle error */ }
-}
 
 </script>
 
@@ -98,7 +79,7 @@ const handleVerify = async () => {
     <div class="otp-view-wrapper flex items-center justify-center min-h-[80vh] p-4">
         <PriToast />
 
-        <div v-if="!isShowResetPwdForm" class="otp-container shadow-2xl transition-all duration-300">
+        <div class="otp-container shadow-2xl transition-all duration-300">
 
             <div class="text-center mb-5">
                 <div class="icon-badge-wrapper mb-4">
@@ -116,7 +97,7 @@ const handleVerify = async () => {
                 <h3 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">Verify Identity</h3>
                 <p class="text-slate-500 mt-3 px-2 text-sm md:text-base leading-relaxed">
                     We've sent a 6-digit verification code to <br />
-                    <span class="font-bold text-primary break-all select-all">{{ email || 'your email' }}</span>
+                    <span class="font-bold text-primary break-all select-all">{{ emailLogin || 'your email' }}</span>
                 </p>
             </div>
 
@@ -125,7 +106,7 @@ const handleVerify = async () => {
                 <div class="flex flex-col items-center w-full">
                     <div class="otp-input-wrapper  sm:scale-100">
                         <PriInputOtp name="Passcode" integerOnly v-model="formData.Passcode" :length="6"
-                            class="gap-1 sm:gap-2" />
+                            :disabled="loading" class="gap-1 sm:gap-2" />
                     </div>
 
                     <PriMessage v-if="resendStatus === 'error'" severity="error" size="small" variant="simple"
@@ -137,9 +118,9 @@ const handleVerify = async () => {
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-2 text-sm">
                     <span class="text-slate-500">Didn't receive a code?</span>
                     <PriButton @click="handleResendOTP" variant="text"
-                        class="p-0 text-primary hover:underline font-bold flex items-center gap-2 transition-colors"
+                        class="p-0 text-primary font-bold flex items-center gap-2 transition-colors"
                         :disabled="resendStatus === 'loading'">
-                        <span>Resend Code</span>
+                        <span class="hover:underline">Resend Code</span>
                         <i v-if="resendStatus === 'loading'" class="pi pi-spin pi-spinner text-xs"></i>
                         <i v-else-if="resendStatus === 'success'" class="pi pi-check text-green-500 text-xs"></i>
                     </PriButton>
@@ -151,12 +132,12 @@ const handleVerify = async () => {
                         icon="pi pi-check-circle" :disabled="formData.Passcode.length !== 6" />
                 </div>
 
-                <!-- <div v-if="isShowBackBtn" class="text-center">
-                    <span class="text-xs text-slate-400 cursor-pointer hover:text-slate-600"
-                        @click="$emit('onBackClick')">
-                        Change email address
+                <div class="text-center w-full">
+                    <span class="text-sm text-primary cursor-pointer hover:underline font-medium"
+                        @click="router.back()">
+                        ← Back to Register
                     </span>
-                </div> -->
+                </div>
             </Form>
         </div>
     </div>
@@ -167,9 +148,9 @@ const handleVerify = async () => {
     width: 100%;
     max-width: 440px;
     padding: 1.5rem;
-    background: linear-gradient(#fffffff0, #fffffff0), 
-              url('/imgs/bg3.png') no-repeat center center;
-  background-size: cover;
+    background: linear-gradient(#fffffff0, #fffffff0),
+        url('/imgs/bg3.png') no-repeat center center;
+    background-size: cover;
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.5);
 }

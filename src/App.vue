@@ -16,7 +16,6 @@ const authStore = useAuthStore();
 // Use storeToRefs to keep isLoggedIn reactive
 const { isLoggedIn } = storeToRefs(authStore);
 
-const msg = ref("Something error.");
 // Optional: Layout logic based on Route Meta
 // const route = useRoute();
 // const showSidebar = computed(() => isLoggedIn.value && route.meta.layout === 'dashboard');
@@ -42,41 +41,24 @@ onMounted(() => {
     });
     axios.interceptors.response.use(
       (response) => {
-        // isLoading.value = false;
-        // isSkeleton.value = false;
         return response;
       },
       (error) => {
-        msg.value = error.message;
-        const toastObj = {
+        console.error('Error App', error);
+        const { message } = error.response.data || {};
+        toast.add({
           severity: "error",
-          summary: "Something went wrong",
-          detail: msg.value,
+          summary: "Error",
+          detail: message || error.response.statusText || 'Something wrong',
           life: 7000
-        }
-
-        // console.log('Log from App.vue', error);
-
-        if (error.response?.status >= 400 && error.response?.status < 500) {
-          const { message, messageKhmer,name } = error.response.data;
-          if (typeof message === "string") {
-            msg.value = message;
-            toastObj.summary = name;
-          }
-        } else if (error.status === 500 || error.response?.status === 500) {
-          msg.value = t('err.server');
-        } else if (error.code === "ERR_NETWORK") {
-          msg.value = t('err.network');
-        }
-
-        toastObj.detail = msg.value;
-        toast.add(toastObj);
+        });
         return Promise.reject(error);
       }
     );
   } catch (error) {
     console.error("Error", error);
-    isLoading.value = false;
+  } finally {
+    console.log('finally');
   }
 });
 

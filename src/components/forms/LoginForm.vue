@@ -23,7 +23,7 @@ const initialValues = ref(
 
 
 const goRegisterForm = () => router.push('/register')
-const goEmailForm = () => router.push('/set-password')
+const goEmailForm = () => router.push('/email')
 const resolver = zodResolver(
   z.object({
     email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
@@ -33,15 +33,15 @@ const resolver = zodResolver(
 
 
 const onFormSubmit = async (e) => {
-  isSubmitting.value = true; // Fixed: was isSubmitting.ref
   if (!e.valid) return;
+  isSubmitting.value = true; // Fixed: was isSubmitting.ref
 
   try {
     const body = { 
       Email: initialValues.value.email,
       Password: initialValues.value.password
     }
-    const response = await $api.user.login(body, { showToast: true});
+    const response = await $api.user.login(body);
     // 2. Update the Store (Save token and user info)
     authStore.login(response.data, 'Bearer xxxx');
     

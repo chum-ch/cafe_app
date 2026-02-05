@@ -1,12 +1,14 @@
 <script setup>
-import { ref, inject, computed, watch } from "vue";
+import { ref, inject, computed, onUnmounted } from "vue";
 import { zodResolver } from "@primevue/forms/resolvers/zod";
 import { z } from "zod";
-import { useToast } from "primevue/usetoast";
 import { Form } from "@primevue/forms";
+import { useRouter } from "vue-router";
+import { storeToRefs } from 'pinia'; // Import this!
 import { useAuthStore } from '@/stores/auth';
-
+import { useOnboardingStore } from '@/stores/onboarding';
 import IconAnimatedKey from "../icons/IconAnimatedKey.vue";
+
 const props = defineProps({
     isShowBackBtn: { type: Boolean, default: true },
     additionalData: { type: Object, default: () => ({}) },
@@ -16,23 +18,23 @@ const emit = defineEmits(["onBackClick", "onSuccess"]);
 
 const onboarding = useOnboardingStore();
 const authStore = useAuthStore();
-const password = ref('');
+const router = useRouter();
+
 const $api = inject("$api");
-const toast = useToast();
 const loading = ref(false);
 const isSuccess = ref(false);
-
-const formData = ref({
-    NewPassword: "",
-    ConfirmPassword: "",
-});
+const countDown = ref(5);
+const emailLogin = storeToRefs(onboarding).email;
+let timer = null; // To store the interval reference
+const formData = ref({ NewPassword: "", ConfirmPassword: "" });
+let userInfo = {};
 
 // Real-time requirements check
 const requirements = computed(() => [
     { label: '6-20 Characters', met: formData.value.NewPassword.length >= 6 && formData.value.NewPassword.length <= 20 },
     { label: 'Upper & Lowercase', met: /[a-z]/.test(formData.value.NewPassword) && /[A-Z]/.test(formData.value.NewPassword) },
     { label: 'Contains Number', met: /\d/.test(formData.value.NewPassword) },
-    { label: 'Special Character', met: /[!@#$%^&*]/.test(formData.value.NewPassword) },
+    { label: 'Special Character', met: /[!@#$%^&*(),.?":{}|<>_\-+/]/.test(formData.value.NewPassword) },
 ]);
 
 const strength = computed(() => {
@@ -44,7 +46,7 @@ const schema = z.object({
     NewPassword: z.string().min(6).max(20)
         .refine((val) => /[a-z]/.test(val) && /[A-Z]/.test(val), '')
         .refine((val) => /\d/.test(val), '')
-        .refine((val) => /[!@#$%^&*]/.test(val), ''),
+        .refine((val) => /[!@#$%^&*(),.?":{}|<>_\-+/]/.test(val), ''),
     ConfirmPassword: z.string().min(1, 'Please confirm your password'),
 }).refine((data) => data.NewPassword === data.ConfirmPassword, {
     message: "Passwords do not match",
@@ -52,50 +54,53 @@ const schema = z.object({
 });
 
 const onFormSubmit = async (e) => {
-    if (!e.valid) return;
     loading.value = true;
+    if (!e.valid) return;
     try {
         const payload = {
+            Email: emailLogin.value,
             Password: formData.value.NewPassword,
             ConfirmPassword: formData.value.ConfirmPassword,
-            ...(props.isForgotPwd && {
-                Email: props.additionalData.Email,
-                OtpCode: Number(props.additionalData.OtpCode),
-                Code: Number(props.additionalData.CodeShop)
-            })
         };
-        if (props.isForgotPwd) await $api.user.forgotPassword(props.additionalData.TenantId, payload);
-        else await $api.user.setPassword(props.additionalData.TenantId, payload);
-
+        const response = await $api.user.setPwd(payload);
+        userInfo = response.data;
         isSuccess.value = true;
-        toast.add({ severity: 'success', summary: 'Success', detail: 'Password updated', life: 3000 });
-        setTimeout(() => emit('onSuccess'), 2200);
+        // 3. Clean up onboarding store
+        console.log('response', response.data);
+        // 4. Route to Home
+        onboarding.reset();
+        // Start the visual countdown
+        startCountdown();
     } catch (error) {
-        toast.add({ severity: 'error', summary: 'Error', detail: error.response?.data?.message || 'Update failed', life: 5000 });
+        console.error('Error Set Password', error);
     } finally {
         loading.value = false;
     }
 };
 
-const handleSetPassword = async () => {
-  try {
-    // 1. Call API /v1/users/set-password
-    await $api.users.setPassword({ 
-      email: onboarding.email, 
-      password: password.value 
-    });
-
-    // 2. Auto Login (Optional but good UX)
-    // await authStore.login({ email: onboarding.email, password: password.value });
-    // OR just manually set logged in state if API returns token
+const goToHome = () => {
+    // 2. Update the Store (Save token and user info)
+    authStore.login(userInfo, 'Bearer xxxx');
     
-    // 3. Clean up onboarding store
-    onboarding.reset();
-
-    // 4. Route to Home
-    router.push({ name: 'home' }); 
-  } catch (error) { /* handle error */ }
+    // 3. Route to Home
+    router.push('/home');
 }
+// Helper to start the countdown
+const startCountdown = () => {
+    timer = setInterval(() => {
+        if (countDown.value > 1) {
+            countDown.value--;
+        } else {
+            clearInterval(timer);
+            goToHome();
+        }
+    }, 1000);
+};
+
+// Safety: Clean up timer if user leaves page manually before countdown ends
+onUnmounted(() => {
+    if (timer) clearInterval(timer);
+});
 
 </script>
 <template>
@@ -109,7 +114,11 @@ const handleSetPassword = async () => {
                         <i class="pi pi-check text-4xl md:text-5xl"></i>
                     </div>
                     <h2 class="text-2xl font-bold mt-6 text-slate-800">Security Updated</h2>
-                    <p class="text-slate-500 mt-2">Redirecting you to login...</p>
+                    <p class="text-slate-500 mt-2">Redirecting you to home in {{ countDown }} s</p>
+                    <button @click="goToHome"
+                        class="block mx-auto mt-6 text-sm text-primary font-bold hover:underline transition-all duration-300 cursor-pointer">
+                        Click here to go now
+                    </button>
                 </div>
 
                 <div v-else>

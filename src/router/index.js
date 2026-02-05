@@ -48,31 +48,37 @@ const router = createRouter({
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/users',
       name: 'users',
       component: () => import('../views/UsersView.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/settings',
       name: 'settings',
       component: () => import('../views/SettingsView.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '//inventory/all',
       name: 'all-products',
       component: () => import('../views/AllProductsView.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/inventory/out',
       name: 'stock-out',
       component: () => import('../views/StockOutView.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/inventory/in',
       name: 'stock-in',
       component: () => import('../views/StockInView.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: "/:pathMatch(.*)*",
@@ -87,8 +93,10 @@ router.beforeEach((to, from, next) => {
   const onboarding = useOnboardingStore();
 
   // 1. Prevent logged-in users from visiting auth pages
-  const authPages = ['login', 'register', 'email', 'verify-otp', 'set-password'];
-  if (authPages.includes(to.name) && auth.isLoggedIn) {
+  const authPages = [ 'welcome', 'login', 'register', 'email', 'verify-otp', 'set-password'];
+  // 1. IF user is logged in AND tries to go to a guest-only page (like '/' or '/login')
+
+  if ((authPages.includes(to.name) || to.path === '/') && auth.isLoggedIn) {
     return next({ name: 'home' });
   }
 
@@ -113,6 +121,7 @@ router.beforeEach((to, from, next) => {
   if (to.name === 'set-password' && !onboarding.email) {
     return next({ name: 'login' });
   }
+
   next();
 });
 
