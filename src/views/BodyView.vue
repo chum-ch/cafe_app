@@ -67,7 +67,7 @@ const handleRegister = () => router.push({ name: 'register' });
 </script>
 
 <template>
-  <div class="img-bg min-h-screen flex flex-col font-sans text-slate-800 bg-white">
+  <div class="img-bg min-h-screen flex flex-col font-sans text-slate-900 bg-white">
     <main class="flex-grow">
       <section class="relative my-5 overflow-hidden from-amber-50 via-white to-white">
         <div class="max-w-5xl mx-auto px-6 text-center">

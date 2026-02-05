@@ -4,13 +4,19 @@ import Sidebar from './components/Sidebar.vue';
 import { inject, onMounted, ref } from "vue";
 import MainCafe from './components/MainCafe.vue';
 import HeaderView from './views/HeaderView.vue';
-import BodyView from './views/BodyView.vue';
 import FooterView from './views/FooterView.vue';
-import { useSession } from './utils/helperFun';
 import { useAuthStore } from '@/stores/auth';
-import { useOnboardingStore } from '@/stores/onboarding';
+import { storeToRefs } from 'pinia'; // Import this!
 
-const isLogin = useAuthStore().isLoggedIn;
+// Reactivity Fix
+const authStore = useAuthStore();
+// Use storeToRefs to keep isLoggedIn reactive
+const { isLoggedIn } = storeToRefs(authStore);
+
+// Optional: Layout logic based on Route Meta
+// const route = useRoute();
+// const showSidebar = computed(() => isLoggedIn.value && route.meta.layout === 'dashboard');
+
 const $api = inject("$api");
 
 const listUsers = async () => {
@@ -40,25 +46,20 @@ const fullMenu = {
 };
 
 </script>
-
 <template>
-  <!-- <RouterView /> -->
-
-  <!-- <TheWelcomeCafe/> -->
-
   <MainCafe>
     <template #header>
       <HeaderView />
     </template>
+
     <template #body>
       <div class="body">
         <div class="flex h-screen overflow-hidden">
-          <Sidebar v-if="isLogin" />
+
+          <Sidebar v-if="isLoggedIn" />
+
           <main class="flex-1 overflow-auto">
             <div class="relative">
-              <!-- <header class="blur-bg shadow h-16 flex items-center px-6 sticky top-0 left-0 right-0 z-10">
-                <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
-              </header> -->
               <div class="text-justify">
                 <router-view v-slot="{ Component }">
                   <transition name="fade" mode="out-in">
@@ -66,12 +67,12 @@ const fullMenu = {
                   </transition>
                 </router-view>
               </div>
-
             </div>
           </main>
         </div>
       </div>
     </template>
+
     <template #footer>
       <FooterView />
     </template>

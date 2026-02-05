@@ -2,38 +2,29 @@
 import { ref, inject, reactive } from "vue";
 import { useToast } from "primevue/usetoast";
 import { Form } from "@primevue/forms";
+import { useRouter } from "vue-router";
+import { useOnboardingStore } from '@/stores/onboarding';
 
-// Consider using a composable for i18n if 't' is required
-// const { t } = useI18n(); 
-
+const emit = defineEmits(["onBackClick", "onSuccess"]);
 const props = defineProps({
     isShowBackBtn: { type: Boolean, default: true },
     email: { type: String, required: false },
     additionalData: { type: Object, default: () => ({}) },
 });
 
-const emit = defineEmits(["onBackClick", "onSuccess"]);
-
-const $api = inject("$api");
+const $api = inject('$api');
+const onboarding = useOnboardingStore();
 const toast = useToast();
-
-// State management
 const loading = ref(false);
 const resendStatus = ref('idle'); // 'idle' | 'loading' | 'success' | 'error'
 const isShowResetPwdForm = ref(false);
+const otpCode = ref('');
 
 const formData = reactive({
     Passcode: "",
 });
 
 // Zod Schema
-
-const handleVerify = async () => {
-    const res = await api.post('/v1/auth/verify-otp', { email: onboarding.email, code: otp.value });
-    onboarding.setRegistrationData(3, '', res.data.token); // Unlock Step 3
-    router.push('/set-password');
-};
-
 const handleResendOTP = async () => {
     if (resendStatus.value === 'loading') return;
 
@@ -83,6 +74,24 @@ const onFormSubmit = async (e) => {
         loading.value = false;
     }
 };
+
+const handleVerify = async () => {
+  try {
+    // 1. Call API /v1/auth/verify-otp
+    // Use onboarding.email to know who we are verifying
+    await $api.auth.verifyOtp({ 
+      email: onboarding.email, 
+      code: otpCode.value 
+    });
+
+    // 2. Update Store (Unlock the Set Password route)
+    onboarding.verifySuccess();
+
+    // 3. Route
+    router.push({ name: 'set-password' });
+  } catch (error) { /* handle error */ }
+}
+
 </script>
 
 <template>

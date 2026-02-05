@@ -86,20 +86,26 @@ router.beforeEach((to, from, next) => {
   const auth = useAuthStore();
   const onboarding = useOnboardingStore();
 
-  // 1. Prevent logged-in users from seeing auth pages
-  if (['login', 'register', 'email', 'set-password'].includes(to.name) && auth.isLoggedIn) {
+  // 1. Prevent logged-in users from visiting auth pages
+  const authPages = ['login', 'register', 'email', 'verify-otp', 'set-password'];
+  if (authPages.includes(to.name) && auth.isLoggedIn) {
     return next({ name: 'home' });
   }
 
-  // 2. Protect Registration Steps (Force sequence)
-  // if (to.name === 'email' && onboarding.stepReached < 2) {
-  //   return next({ name: 'register' });
-  // }
-  // if (to.name === 'set-password' && onboarding.stepReached < 3) {
-  //   return next({ name: 'email' });
-  // }
+  // 2. Protect Onboarding Sequence (The "Wizard" Logic)
+  
+  // Guard: Cannot visit OTP page if we don't have an email in memory
+  if (to.name === 'verify-otp' && !onboarding.email) {
+    // Redirect back to start based on intent, or default to login
+    return next({ name: 'login' }); 
+  }
 
-  // 3. Global Auth Guard for protected pages
+  // Guard: Cannot visit Set Password if OTP is not verified
+  if (to.name === 'set-password' && !onboarding.isOtpVerified) {
+    return next({ name: 'verify-otp' });
+  }
+
+  // 3. Global Auth Guard
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     return next({ name: 'login' });
   }

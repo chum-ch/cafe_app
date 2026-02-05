@@ -4,17 +4,21 @@ import { zodResolver } from "@primevue/forms/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "primevue/usetoast";
 import { Form } from "@primevue/forms";
+import { useAuthStore } from '@/stores/auth';
+
 import IconAnimatedKey from "../icons/IconAnimatedKey.vue";
 const props = defineProps({
     isShowBackBtn: { type: Boolean, default: true },
     additionalData: { type: Object, default: () => ({}) },
     isForgotPwd: { type: Boolean, default: false },
 });
-
 const emit = defineEmits(["onBackClick", "onSuccess"]);
+
+const onboarding = useOnboardingStore();
+const authStore = useAuthStore();
+const password = ref('');
 const $api = inject("$api");
 const toast = useToast();
-
 const loading = ref(false);
 const isSuccess = ref(false);
 
@@ -72,6 +76,27 @@ const onFormSubmit = async (e) => {
         loading.value = false;
     }
 };
+
+const handleSetPassword = async () => {
+  try {
+    // 1. Call API /v1/users/set-password
+    await $api.users.setPassword({ 
+      email: onboarding.email, 
+      password: password.value 
+    });
+
+    // 2. Auto Login (Optional but good UX)
+    // await authStore.login({ email: onboarding.email, password: password.value });
+    // OR just manually set logged in state if API returns token
+    
+    // 3. Clean up onboarding store
+    onboarding.reset();
+
+    // 4. Route to Home
+    router.push({ name: 'home' }); 
+  } catch (error) { /* handle error */ }
+}
+
 </script>
 <template>
     <div class="set-pwd-container flex items-center justify-center min-h-[90vh] p-4 sm:p-6">

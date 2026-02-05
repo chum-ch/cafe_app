@@ -7,7 +7,11 @@ import { z } from "zod";
 import { useToast } from "primevue/usetoast";
 import IconMail from "../icons/IconMail.vue";
 import { useRouter } from "vue-router";
+import { useOnboardingStore } from '@/stores/onboarding';
 
+const $api = inject('$api');
+const onboarding = useOnboardingStore();
+const email = ref('');
 const router = useRouter();
 const toast = useToast();
 const isSubmitting = ref(false);
@@ -53,6 +57,19 @@ const onFormSubmit = async (e) => {
     isSubmitting.value = false;
   }
 };
+
+const handleSendEmail = async () => {
+  try {
+    // 1. Call API /v1/user/send-email
+    await $api.user.sendEmail(email.value);
+    
+    // 2. Update Store with "Forgot Password" context
+    onboarding.startForgotPassword(email.value);
+    
+    // 3. Route
+    router.push({ name: 'verify-otp' });
+  } catch (error) { /* handle error */ }
+}
 </script>
 
 <template>

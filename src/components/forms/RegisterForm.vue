@@ -1,13 +1,34 @@
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, inject } from "vue";
 import { Form } from "@primevue/forms";
 import { zodResolver } from "@primevue/forms/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "primevue/usetoast";
 import IconCafe from "../icons/IconCafe.vue";
 import { useRouter } from "vue-router";
+import { useOnboardingStore } from '@/stores/onboarding';
 
+const $api = inject('$api');
 const router = useRouter();
+const onboarding = useOnboardingStore();
+const form = ref({ email: '', password: '' });
+
+const handleRegister = async () => {
+  try {
+    // 1. Call API
+    await $api.auth.register(form.value);
+    
+    // 2. Update Store (Crucial for Router Guard)
+    onboarding.startRegistration(form.value.email);
+    
+    // 3. Route to Next Step
+    router.push({ name: 'verify-otp' });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+
 const toast = useToast();
 const isSubmitting = ref(false);
 
@@ -23,12 +44,6 @@ const resolver = zodResolver(
     email: z.string().min(1, "Email is required").email("Please enter a valid email address."),
   })
 );
-
-const handleRegister = async () => {
-  await api.post('/v1/auth/register', { email: email.value });
-  onboarding.setRegistrationData(2, email.value); // Unlock Step 2
-  router.push('/email');
-};
 
 const onFormSubmit = async (e) => {
   if (!e.valid) return;
