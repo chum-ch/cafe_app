@@ -6,8 +6,8 @@ const auth = useAuthStore();
 </script>
 
 <template>
-  <div class="sticky top-0 z-50 w-full shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+  <div class="sticky top-0 z-50 w-full shadow-sm bg-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-15 flex items-center justify-between">
 
       <div class="flex items-center gap-2.5 cursor-pointer group">
         <div class="p-2 bg-gradient-to-tr from-amber-600 to-amber-500 rounded-xl shadow-lg">

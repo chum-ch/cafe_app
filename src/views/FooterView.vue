@@ -5,7 +5,7 @@ import { Coffee, Mail, Phone, Heart } from 'lucide-vue-next';
 
 <template>
   <div class="bg-slate-950 text-slate-400 py-2 border-t border-slate-900">
-    <div class="max-w-7xl mx-auto px-3 flex flex-col md:flex-row justify-between items-center gap-4">
+    <div class="max-w-7xl mx-auto px-3 flex flex-col md:flex-row justify-between items-center gap-2">
 
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-2 text-white font-bold text-lg">
