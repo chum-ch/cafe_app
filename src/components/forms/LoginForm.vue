@@ -1,20 +1,26 @@
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, inject } from "vue";
 import { Form } from "@primevue/forms";
 import { zodResolver } from "@primevue/forms/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "primevue/usetoast";
 import IconCafe from "../icons/IconCafe.vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from '@/stores/auth';
 
+const $api = inject('$api');
 const router = useRouter();
 const toast = useToast();
+const authStore = useAuthStore();
 const isSubmitting = ref(false);
-const isLogin = ref(true);
-const initialValues = reactive({
-  email: "",
-  password: "",
-});
+const initialValues = ref(
+  {
+    email: "",
+    password: "",
+  }
+);
+
+
 
 const goRegisterForm = () => router.push('/register')
 const goEmailForm = () => router.push('/set-password')
@@ -25,43 +31,25 @@ const resolver = zodResolver(
   })
 );
 
-const handleLogin = async () => {
-  try {
-    const res = await api.post('/v1/auth/login', credentials);
-    auth.login(res.data.user, res.data.token);
-    router.push('/home');
-  } catch (err) {
-    // If API says user exists but is not verified
-    if (err.response?.data?.status === 'unverified') {
-      onboarding.setRegistrationData(2, credentials.email);
-      router.push('/email');
-    }
-  }
-};
 
 const onFormSubmit = async (e) => {
+  isSubmitting.value = true; // Fixed: was isSubmitting.ref
   if (!e.valid) return;
 
-  isSubmitting.value = true; // Fixed: was isSubmitting.ref
-
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    toast.add({
-      severity: "success",
-      summary: "Success",
-      detail: `Welcome back, ${e.values.email}!`, // Fixed: variable name
-      life: 3000,
-    });
+    const body = { 
+      Email: initialValues.value.email,
+      Password: initialValues.value.password
+    }
+    const response = await $api.user.login(body, { showToast: true});
+    // 2. Update the Store (Save token and user info)
+    authStore.login(response.data, 'Bearer xxxx');
+    
+    // 3. Route to Home
+    router.push('/home');
 
   } catch (error) {
-    toast.add({
-      severity: "error",
-      summary: "Login Failed",
-      detail: "Invalid credentials. Please try again.",
-      life: 3000
-    });
+    console.error('Error Login', error);
   } finally {
     isSubmitting.value = false;
   }
@@ -74,7 +62,7 @@ const onFormSubmit = async (e) => {
     <div class="form shadow-2xl rounded-xl w-full max-w-[450px] transition-all duration-300">
       
       <div class="text-center mb-6">
-        <IconCafe class="mx-auto mb-2" :size="80" :color="'#6F4E37'" />
+        <IconCafe class="mx-auto mb-2" :size="80" :color="'var(--bg-cafe-2)'" />
         <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Cafe Login</h2>
         <p class="text-slate-500 text-sm">Please enter your credentials</p>
       </div>
@@ -93,8 +81,10 @@ const onFormSubmit = async (e) => {
             name="email" 
             type="text" 
             placeholder="Email*" 
+            v-model="initialValues.email"
             fluid
             :class="{ 'p-invalid': $form?.email?.invalid }" 
+            :disabled="isSubmitting"
           />
           <PriMessage v-if="$form?.email?.invalid" severity="error" size="small" variant="simple">
             {{ $form.email.error.message }}
@@ -110,6 +100,7 @@ const onFormSubmit = async (e) => {
             :feedback="false" 
             fluid 
             :class="{ 'p-invalid': $form?.password?.invalid }" 
+            :disabled="isSubmitting"
           />
           <template v-if="$form?.password?.invalid">
             <PriMessage v-for="(error, index) of $form.password.errors" :key="index" severity="error" size="small"
@@ -134,6 +125,7 @@ const onFormSubmit = async (e) => {
             :loading="isSubmitting"
             :disabled="!$form.valid"
             class="w-full style-slide-up"
+            :icon="!isSubmitting ? 'pi pi-sign-in' : 'pi pi-spinner pi-spin'"
             :style="!$form.valid ? { cursor: 'not-allowed' } : ''"
           />
         </div>

@@ -1,6 +1,8 @@
 <script setup>
 
 import { onBeforeMount, onMounted, onBeforeUpdate, onUpdated, onBeforeUnmount, onUnmounted } from "vue";
+const pwd = 'P@ssw0rd123';
+
 // Runs before the component is mounted to the DOM
 onBeforeMount(() => {
   console.log('onBeforeMount: The component is about to be mounted.');

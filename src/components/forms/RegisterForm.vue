@@ -52,7 +52,7 @@ const onFormSubmit = async (e) => {
 
   try {
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // await new Promise(resolve => setTimeout(resolve, 1500));
 
     toast.add({
       severity: "success",
@@ -62,12 +62,7 @@ const onFormSubmit = async (e) => {
     });
 
   } catch (error) {
-    toast.add({
-      severity: "error",
-      summary: "Login Failed",
-      detail: "Invalid credentials. Please try again.",
-      life: 3000
-    });
+    console.error('Error Register', error);
   } finally {
     isSubmitting.value = false;
   }
@@ -75,7 +70,7 @@ const onFormSubmit = async (e) => {
 </script>
 
 <template>
-  <div class="register-container flex items-center justify-center min-h-screen p-4 bg-slate-50">
+  <div class="register-container flex items-center justify-center min-h-screen p-4">
     <PriToast />
     
     <div class="form shadow-2xl rounded-xl w-full max-w-[450px] transition-all duration-300">

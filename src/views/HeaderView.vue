@@ -1,8 +1,18 @@
 <script setup>
 import IconCafe from '@/components/icons/IconCafe.vue';
 import { useAuthStore } from '@/stores/auth';
+import { storeToRefs } from 'pinia'; // Import this!
+import { useRouter } from "vue-router";
 
-const auth = useAuthStore();
+const authStore = useAuthStore();
+const router = useRouter();
+// Use storeToRefs to keep isLoggedIn reactive
+const { isLoggedIn } = storeToRefs(authStore);
+const  goToLogin = () => {
+  router.push('/login');
+  // Clean up onboarding store
+  authStore.logout();
+};
 </script>
 
 <template>
@@ -18,8 +28,9 @@ const auth = useAuthStore();
         </span>
       </div>
 
-      <div class="flex items-center gap-3" v-if="auth.isLoggedIn">
+      <div class="flex items-center gap-3" v-if="isLoggedIn">
         <PriButton label="Log out" icon="pi pi-sign-out" severity="warn"
+          @click="goToLogin"
           class="hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
         </PriButton>
       </div>

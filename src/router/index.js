@@ -110,6 +110,9 @@ router.beforeEach((to, from, next) => {
     return next({ name: 'login' });
   }
 
+  if (to.name === 'set-password' && !onboarding.email) {
+    return next({ name: 'login' });
+  }
   next();
 });
 
