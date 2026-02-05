@@ -1,16 +1,14 @@
 <script setup>
-import { ref, reactive, inject } from "vue";
+import { ref, inject } from "vue";
 import { Form } from "@primevue/forms";
 import { zodResolver } from "@primevue/forms/resolvers/zod";
 import { z } from "zod";
-import { useToast } from "primevue/usetoast";
 import IconCafe from "../icons/IconCafe.vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from '@/stores/auth';
 
 const $api = inject('$api');
 const router = useRouter();
-const toast = useToast();
 const authStore = useAuthStore();
 const isSubmitting = ref(false);
 const initialValues = ref(
@@ -56,9 +54,7 @@ const onFormSubmit = async (e) => {
 };
 </script>
 <template>
-  <div class="login-container flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
-    <PriToast />
-    
+  <div class="login-container flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">    
     <div class="form shadow-2xl rounded-xl w-full max-w-[450px] transition-all duration-300">
       
       <div class="text-center mb-6">

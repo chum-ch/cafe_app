@@ -74,36 +74,39 @@ const fullMenu = {
 
 </script>
 <template>
-  <MainCafe>
-    <template #header>
-      <HeaderView />
-    </template>
+  <div class="">
+    <PriToast position="top-center" />
+    <MainCafe>
+      <template #header>
+        <HeaderView />
+      </template>
 
-    <template #body>
-      <div class="body">
-        <div class="flex h-screen overflow-hidden">
+      <template #body>
+        <div class="body">
+          <div class="flex h-screen overflow-hidden">
 
-          <Sidebar v-if="isLoggedIn" />
+            <Sidebar v-if="isLoggedIn" />
 
-          <main class="flex-1 overflow-auto">
-            <div class="relative">
-              <div class="text-justify">
-                <router-view v-slot="{ Component }">
-                  <transition name="fade" mode="out-in">
-                    <component :is="Component" />
-                  </transition>
-                </router-view>
+            <main class="flex-1 overflow-auto">
+              <div class="relative">
+                <div class="text-justify">
+                  <router-view v-slot="{ Component }">
+                    <transition name="fade" mode="out-in">
+                      <component :is="Component" />
+                    </transition>
+                  </router-view>
+                </div>
               </div>
-            </div>
-          </main>
+            </main>
+          </div>
         </div>
-      </div>
-    </template>
+      </template>
 
-    <template #footer>
-      <FooterView />
-    </template>
-  </MainCafe>
+      <template #footer>
+        <FooterView />
+      </template>
+    </MainCafe>
+  </div>
 </template>
 
 <style scoped>

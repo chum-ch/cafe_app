@@ -109,7 +109,7 @@ const getTooltip = (label) => {
   >
     
     <div class="h-20 flex items-center px-4 border-b border-slate-700/50 overflow-hidden whitespace-nowrap">
-      <div class="flex items-center gap-3 min-w-max">
+      <div class="flex items-center gap-3 min-w-max cursor-pointer" @click="router.push('/home')">
         <div class="w-10 h-10 bg-indigo-500 p-2 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
         <IconCafe :size="24" :color="'#fff'"/>
         </div>

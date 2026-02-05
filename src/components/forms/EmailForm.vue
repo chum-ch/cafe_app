@@ -51,9 +51,7 @@ const onFormSubmit = async (e) => {
 </script>
 
 <template>
-  <div class="login-container flex items-center justify-center min-h-screen p-4">
-    <PriToast />
-    
+  <div class="login-container flex items-center justify-center min-h-screen p-4">    
     <div class="form shadow-2xl rounded-2xl w-full max-w-md transition-all duration-300">
       <div class="text-center mb-7">
         <IconMail class="mx-auto mb-4" :size="80" :color="'#6F4E37'" />

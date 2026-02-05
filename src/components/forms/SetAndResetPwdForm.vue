@@ -105,7 +105,6 @@ onUnmounted(() => {
 </script>
 <template>
     <div class="set-pwd-container flex items-center justify-center min-h-[90vh] p-4 sm:p-6">
-        <PriToast />
 
         <div class="pwd-card shadow-2xl rounded-2xl w-full max-w-[450px] transition-all duration-300">
             <Transition name="view-flip" mode="out-in">

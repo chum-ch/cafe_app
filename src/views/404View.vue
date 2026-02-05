@@ -23,7 +23,7 @@ const goHome = () => {
 </script>
 
 <template>
-  <section class="bg-white py-10 font-mono flex items-center justify-center">
+  <section class="py-10 font-mono flex items-center justify-center">
     <div class="container mx-auto px-4">
       <div class="max-w-3xl mx-auto text-center">
         

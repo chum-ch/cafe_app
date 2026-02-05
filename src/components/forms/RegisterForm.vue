@@ -6,7 +6,6 @@ import { z } from "zod";
 import { useRouter } from "vue-router";
 import { useOnboardingStore } from '@/stores/onboarding';
 import IconCafe from "../icons/IconCafe.vue";
-import { useSession } from '../../utils/helperFun';
 
 const $api = inject('$api');
 const router = useRouter();
@@ -54,8 +53,6 @@ const onFormSubmit = async (e) => {
 
 <template>
   <div class="register-container flex items-center justify-center min-h-screen p-4">
-    <PriToast />
-
     <div class="form shadow-2xl rounded-xl w-full max-w-[450px] transition-all duration-300">
       <div class="text-center mb-6">
         <IconCafe class="mx-auto mb-3" :size="80" :color="'#6F4E37'" />

@@ -1,6 +1,5 @@
 <script setup>
 import { ref, inject, reactive } from "vue";
-import { useToast } from "primevue/usetoast";
 import { Form } from "@primevue/forms";
 import { useRouter } from "vue-router";
 import { useOnboardingStore } from '@/stores/onboarding';
@@ -15,7 +14,6 @@ const props = defineProps({
 
 const $api = inject('$api');
 const onboarding = useOnboardingStore();
-const toast = useToast();
 const router = useRouter();
 const loading = ref(false);
 const resendStatus = ref('idle'); // 'idle' | 'loading' | 'success' | 'error'
@@ -32,12 +30,6 @@ const handleResendOTP = async () => {
         await $api.user.sendEmail(body);
 
         resendStatus.value = 'success';
-        toast.add({
-            severity: "success",
-            summary: "OTP Sent",
-            detail: "A new code has been sent to your email.",
-            life: 3000,
-        });
     } catch (error) {
         resendStatus.value = 'error';
         console.error("Resend OTP error:", error);
@@ -77,8 +69,6 @@ const onFormSubmit = async (e) => {
 
 <template>
     <div class="otp-view-wrapper flex items-center justify-center min-h-[80vh] p-4">
-        <PriToast />
-
         <div class="otp-container shadow-2xl transition-all duration-300">
 
             <div class="text-center mb-5">
