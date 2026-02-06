@@ -2,12 +2,16 @@
 import { ref, computed } from 'vue';
 import { Flame, Snowflake, ShoppingBag, Plus, Droplets, ShoppingCart } from 'lucide-vue-next';
 
+// PrimeVue Component (This is the logic/functionality)
+import Rating from 'primevue/rating';
 const props = defineProps({
   item: {
     type: Object,
     default: () => ({
       name: 'Caramel Frappuccino',
       price: 3.95,
+      rating: 4,
+      popular: false,
       description: 'Velvety caramel syrup blended with premium coffee and chilled milk.',
       image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?q=80&w=400&auto=format&fit=crop'
     })
@@ -45,7 +49,6 @@ const handleAddToCart = () => {
     mood: selectedMood.value,
     sugar: selectedSugar.value
   }
-  console.log('item', item);
   emit('add-to-cart', item);
 };
 </script>
@@ -58,9 +61,16 @@ const handleAddToCart = () => {
           <div
             class="absolute inset-0 bg-stone-200 rounded-full scale-95 blur-xl opacity-50 group-hover:scale-110 transition-transform duration-500">
           </div>
+
           <img :src="item.image"
             class="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full object-cover border-8 border-white shadow-lg"
             :alt="item.name" />
+
+          <div v-if="item.popular"
+            class="flex absolute -top-2 -left-2 bg-amber-400 text-amber-900 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full border-2 border-white shadow-md animate-bounce">
+            <Flame size="14" class="text-amber-900 mx-1" /> <span>Popular</span>
+          </div>
+
           <div
             class="absolute top-2 right-2 bg-stone-900 text-white w-14 h-14 rounded-full flex items-center justify-center font-bold border-4 border-white shadow-lg text-sm">
             ${{ item.price.toFixed(2) }}
@@ -70,24 +80,46 @@ const handleAddToCart = () => {
         <h2 class="mt-4 text-2xl sm:text-3xl font-black text-stone-800 tracking-tight text-center">
           {{ item.name }}
         </h2>
+
+        <div class="flex items-center gap-2 mt-2">
+          <Rating v-model="item.rating" readonly :cancel="false">
+            <template #onicon>
+              <span class="text-amber-500">★</span>
+            </template>
+            <template #officon>
+              <span class="text-stone-300">☆</span>
+            </template>
+          </Rating>
+
+          <span class="text-stone-500 text-sm font-bold" v-if="item.rating">
+            ({{item.rating}})
+          </span>
+        </div>
       </div>
       <div class="p-4">
         <div class="grid grid-cols-2 flext wrap justify-center gap-6">
           <div class="space-y-3">
-            <label class="block text-[10px] font-black uppercase tracking-widest  text-center mb-3">Mood</label>
+            <label
+              class="block text-[10px] font-black uppercase tracking-widest  text-center mb-3 text-amber-400">Mood</label>
             <div class=" flex justify-center gap-3">
-              <button v-for="mood in CONFIG.moods" :key="mood.id" @click="selectedMood = mood.id" :class="[
-                selectedMood === mood.id ? `${mood.color} text-white ring-4 ${mood.ring} scale-110` : 'bg-stone-50 text-stone-400 hover:bg-stone-100',
-                'w-12 p-2 rounded-full transition-all duration-300 flex items-center justify-center shadow-sm active:scale-90'
-              ]">
-                <component :is="mood.icon" size="20"
-                  :class="{ 'animate-pulse': selectedMood === 'hot' && mood.id === 'hot', 'animate-spin-slow': selectedMood === 'cold' && mood.id === 'cold' }" />
+              <button v-for="mood in CONFIG.moods" :key="mood.id" @click="selectedMood = mood.id"
+                v-tooltip.top="mood.id === 'hot' ? 'It\'s Hot!' : 'It\'s Cold!'" :class="[
+                  selectedMood === mood.id
+                    ? `${mood.color} text-white ring-4 ${mood.ring} scale-110`
+                    : 'bg-stone-50 text-stone-400 hover:bg-stone-100',
+                  'w-12 p-2 rounded-full transition-all duration-300 flex items-center justify-center shadow-sm active:scale-90'
+                ]">
+                <component :is="mood.icon" size="20" :class="{
+                  'animate-pulse': selectedMood === 'hot' && mood.id === 'hot',
+                  'animate-spin-slow': selectedMood === 'cold' && mood.id === 'cold'
+                }" />
               </button>
             </div>
           </div>
 
           <div class="space-y-3">
-            <label class="block text-[10px] font-black uppercase tracking-widest  text-center mb-3">Size</label>
+            <label
+              class="block text-[10px] font-black uppercase tracking-widest  text-center mb-3 text-amber-400">Size</label>
             <div class="flex justify-center gap-3">
               <button v-for="size in CONFIG.sizes" :key="size" @click="selectedSize = size"
                 class="p-2 rounded-full font-black transition-all duration-300 shadow-sm flex items-center justify-center"
@@ -105,8 +137,8 @@ const handleAddToCart = () => {
 
         <div class="space-y-4 my-3">
           <div class="flex items-center justify-center gap-2">
-            <Droplets size="14" class="text-stone-300" />
-            <span class="text-[10px] font-black uppercase tracking-widest mb-2">Sugar Level</span>
+            <Droplets size="14" class="text-stone-800" />
+            <span class="text-[10px] font-black uppercase tracking-widest mb-2 text-amber-400">Sugar Level</span>
           </div>
           <div class="flex p-1 bg-stone-50 rounded-2xl border border-stone-100">
             <button v-for="level in CONFIG.sugarLevels" :key="level" @click="selectedSugar = level"
@@ -118,11 +150,10 @@ const handleAddToCart = () => {
         </div>
 
         <PriButton @click="handleAddToCart"
-          
           class="group mt-4 relative w-full bg-stone-900 rounded-2xl overflow-hidden transition-all duration-300 hover:bg-stone-800 active:scale-[0.98] shadow-xl shadow-stone-200">
           <div class="relative z-10 flex items-center justify-center gap-4 text-white">
             <!-- <ShoppingBag size="20" class="text-amber-400" /> -->
-            <span class="text-lg font-bold ">Add to Order</span>
+            <span class="">Add to Order</span>
             <div class="w-[1px] h-4 bg-white/30"></div>
             <ShoppingCart class="text-amber-400" />
           </div>

@@ -28,8 +28,8 @@ onMounted(() => {
       if (config.showToast) {
         toast.add({
           severity: "success",
-          summary: "Success",
-          detail: 'Data has been submitted!',
+          summary: "Data has been submitted!",
+          // detail: 'Data has been submitted!',
           life: 3000,
         });
       }
@@ -48,8 +48,8 @@ onMounted(() => {
         const { message } = error.response.data || {};
         toast.add({
           severity: "error",
-          summary: "Error",
-          detail: message || error.response.statusText || 'Something wrong',
+          summary: `${message}` || `${error.response.statusText}` || 'Something wrong',
+          // detail: ,
           life: 7000
         });
         return Promise.reject(error);
@@ -75,7 +75,7 @@ const fullMenu = {
 </script>
 <template>
   <div class="">
-    <PriToast position="top-center" />
+    <PriToast position="top-center" class="p-toast-top-center p-3 w-full" />
     <MainCafe>
       <template #header>
         <HeaderView />
@@ -134,7 +134,6 @@ nav a {
 nav a:first-of-type {
   border: 0;
 }
-
 /* --- Smartphones (landscape) and Small Tablets (portrait) --- */
 /* (e.g., min-width of 576px) */
 

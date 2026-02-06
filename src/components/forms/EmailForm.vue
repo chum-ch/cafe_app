@@ -33,9 +33,8 @@ const onFormSubmit = async (e) => {
     // Simulate API call
     const payload = { Email: initialValues.value.email };
     const response = await $api.user.sendEmail(payload);
-    if (response.data.RootUser) useSession.set('tenant_info', { TenantId: response.data.TenantId, Email: response.data.Email });
-    useSession.set('email_login', initialValues.value.email);
-    
+
+    console.log('response', response.data);
     // 2. Update Store with "Forgot Password" context
     onboarding.startForgotPassword(initialValues.value.email);
     

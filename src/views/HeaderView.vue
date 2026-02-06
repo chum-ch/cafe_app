@@ -29,7 +29,7 @@ const  goToLogin = () => {
       </div>
 
       <div class="flex items-center gap-3" v-if="isLoggedIn">
-        <PriButton label="Log out" icon="pi pi-sign-out" severity="warn"
+        <PriButton label="Log out" icon="pi pi-sign-out" outlined severity="danger" size="small"
           @click="goToLogin"
           class="hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
         </PriButton>

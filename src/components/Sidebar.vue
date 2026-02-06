@@ -21,7 +21,7 @@ import IconUsers from './icons/IconUsers.vue';
 import IconBox from './icons/IconBox.vue';
 
 // State
-const isCollapsed = ref(false); // Sidebar state
+const isCollapsed = ref(true); // Sidebar state
 const expandedMenus = ref({});  // Track which sub-menus are open
 
 const route = useRoute();
