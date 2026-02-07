@@ -76,6 +76,7 @@ const handleRegister = () => router.push({ name: 'register' });
             class="inline-block py-1.5 px-4 rounded-full bg-amber-100/50 text-amber-700 text-sm font-semibold mb-6 border border-amber-200">
             Version 2.0 Now Live
           </span> -->
+
           <h1 class="text-4xl subpixel-antialiased md:text-6xl font-extrabold text-slate-900 tracking-tight mb-4">
             Brew Success with <br />
             <span class="text-3xl bg-clip-text text-amber-600 from-amber-200 to-orange-600">
