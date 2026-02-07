@@ -119,7 +119,7 @@ const onFormSubmit = async (e) => {
             severity="primary" 
             label="Login" 
             :loading="isSubmitting"
-            :disabled="!$form.valid"
+            :disabled="!$form.valid || isSubmitting"
             class="w-full style-slide-up"
             :icon="!isSubmitting ? 'pi pi-sign-in' : 'pi pi-spinner pi-spin'"
             :style="!$form.valid ? { cursor: 'not-allowed' } : ''"

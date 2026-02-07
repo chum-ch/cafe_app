@@ -26,15 +26,15 @@ const resolver = zodResolver(
 );
 
 const onFormSubmit = async (e) => {
-  isSubmitting.value = true;
   if (!e.valid) return;
+  isSubmitting.value = true;
 
   try {
     // Simulate API call
     const payload = { Email: initialValues.value.email };
     const response = await $api.user.sendEmail(payload);
 
-    console.log('response', response.data);
+    // console.log('response', response.data);
     // 2. Update Store with "Forgot Password" context
     onboarding.startForgotPassword(initialValues.value.email);
     
@@ -91,7 +91,7 @@ const onFormSubmit = async (e) => {
             label="Send OTP"
             :loading="isSubmitting"
             icon="pi pi-envelope"
-            :disabled="!$form.valid"
+            :disabled="!$form.valid || isSubmitting"
             class="w-full font-semibold style-slide-up"
             :style="!$form.valid ? { cursor: 'not-allowed' } : ''"
           />

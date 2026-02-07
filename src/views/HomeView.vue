@@ -8,7 +8,7 @@ import Select from 'primevue/select';
 import { Search, Filter } from 'lucide-vue-next';
 import CardOrder from '@/components/CardOrder.vue';
 import CartDrawer from './CartDrawer.vue';
-import { ShoppingBag } from 'lucide-vue-next';
+import { ShoppingCart } from 'lucide-vue-next';
 // --- Data ---
 const coffees = ref([
   {
@@ -87,6 +87,9 @@ const cartItems = ref([]);
 
 // 1. Add to Cart Logic
 const addToCart = (product) => {
+  // Reassign ID to prevent duplicate items ID = id+size+mood+sugar
+
+  product.id = product.id + product.size + product.mood + product.sugar;
   const quantity = 1;
   const index = cartItems.value.findIndex(item => item.id === product.id);
   if (index !== -1) {
@@ -158,12 +161,12 @@ const removeItem = (id) => {
 
     <PriButton @click="isCartOpen = true"
       class=" text-white fixed bottom-[10rem] right-4 p-2 shadow-lg shadow-purple-200/50 hover:shadow-purple-200/100 active:scale-95 transition-all duration-300">
-      <ShoppingBag class="" />
+      <ShoppingCart class="" />
       <span class="font-bold ">{{ cartItems.length }}</span>
     </PriButton>
 
     <CartDrawer :is-open="isCartOpen" :items="cartItems" @close="isCartOpen = false" @update-quantity="updateQuantity"
-      @remove-item="removeItem" @checkout="console.log('Proceed to Payment', cartItems)" />
+      @remove-item="removeItem" />
   </div>
 </template>
 

@@ -54,8 +54,8 @@ const schema = z.object({
 });
 
 const onFormSubmit = async (e) => {
-    loading.value = true;
     if (!e.valid) return;
+    loading.value = true;
     try {
         const payload = {
             Email: emailLogin.value,
@@ -66,7 +66,7 @@ const onFormSubmit = async (e) => {
         userInfo = response.data;
         isSuccess.value = true;
         // 3. Clean up onboarding store
-        console.log('response', response.data);
+        // console.log('response', response.data);
         // 4. Route to Home
         onboarding.reset();
         // Start the visual countdown
@@ -172,7 +172,7 @@ onUnmounted(() => {
 
                         <div class="flex flex-col gap-3 mt-3">
                             <PriButton type="submit" label="Update Security" :loading="loading"
-                                class="update-btn text-lg style-slide-up" :disabled="!$form.valid"
+                                class="update-btn text-lg style-slide-up" :disabled="!$form.valid || loading"
                                 :style="!$form.valid ? { cursor: 'not-allowed' } : ''" />
                         </div>
                     </Form>
