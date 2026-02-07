@@ -77,7 +77,7 @@ const handleAddToCart = () => {
           </div>
         </div>
 
-        <h2 class="mt-4 text-2xl sm:text-3xl font-black text-stone-800 tracking-tight text-center">
+        <h2 class="mt-4 px-3 text-2xl sm:text-3xl font-black text-stone-800 tracking-tight text-center">
           {{ item.name }}
         </h2>
 
@@ -97,7 +97,7 @@ const handleAddToCart = () => {
         </div>
       </div>
       <div class="p-4">
-        <div class="grid grid-cols-2 flext wrap justify-center gap-6">
+        <div class="grid grid-cols-2 flext wrap justify-center gap-4">
           <div class="space-y-3">
             <label
               class="block text-[10px] font-black uppercase tracking-widest  text-center mb-3 text-amber-400">Mood</label>
@@ -107,7 +107,7 @@ const handleAddToCart = () => {
                   selectedMood === mood.id
                     ? `${mood.color} text-white ring-4 ${mood.ring} scale-110`
                     : 'bg-stone-50 text-stone-400 hover:bg-stone-100',
-                  'w-12 p-2 rounded-full transition-all duration-300 flex items-center justify-center shadow-sm active:scale-90'
+                  ' p-2 rounded-full transition-all duration-300 flex items-center justify-center shadow-sm active:scale-90'
                 ]">
                 <component :is="mood.icon" size="20" :class="{
                   'animate-pulse': selectedMood === 'hot' && mood.id === 'hot',

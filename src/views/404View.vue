@@ -1,7 +1,6 @@
 <script setup>
-import IconBack from '@/components/icons/IconBack.vue';
 import { useRouter } from 'vue-router';
-
+import IconBack from '@/components/icons/IconBack.vue';
 // Senior tip: Props make this component reusable for different "Not Found" scenarios
 defineProps({
   title: {
