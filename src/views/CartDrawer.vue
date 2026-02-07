@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-vue-next';
+import { X, Plus, Minus, Trash2, ShoppingCart, Flame, Snowflake } from 'lucide-vue-next';
 
 const props = defineProps({
     isOpen: Boolean,
@@ -37,7 +37,7 @@ const subtotal = computed(() => {
     }, 0);
 });
 
-const deliveryFee = 2.00;
+const deliveryFee = 0;
 
 const total = computed(() => {
     return subtotal.value + deliveryFee;
@@ -53,7 +53,7 @@ const formatCurrency = (value) => {
 
 // --- METHODS ---
 const handleIncrement = (item) => {
-    console.log('incrementing');
+    // console.log('incrementing');
     emit('update-quantity', { id: item.id, amount: 1 });
 };
 
@@ -62,6 +62,78 @@ const handleDecrement = (item) => {
     if (toNum(item.quantity) > 1) {
         emit('update-quantity', { id: item.id, amount: -1 });
     }
+};
+
+// Configuration Arrays
+const CONFIG = {
+    sizes: ['S', 'M', 'L'],
+    sugarLevels: ['30%', '50%', '70%', '100%'],
+    moods: [
+        { id: 'hot', icon: Flame, color: 'bg-orange-500', ring: 'ring-orange-100' },
+        { id: 'cold', icon: Snowflake, color: 'bg-blue-500', ring: 'ring-blue-100' }
+    ]
+};
+
+// Define unique styles for each size when selected
+const sizeStyles = {
+    S: 'bg-amber-400 text-white',    // Small = Amber/Gold
+    M: 'bg-orange-500 text-white', // Medium = Orange (The "Default" pop)
+    L: 'bg-emerald-500 text-white' // Large = Emerald/Green
+};
+const totalItemsCount = computed(() => {
+    // Use Number() or parseFloat() to prevent "NaN" if data is messy
+    return props.items.reduce((total, item) => {
+        return total + (Number(item.quantity) || 0);
+    }, 0);
+});
+
+const pluralize = (count, word) => {
+    if (count === 1) return word;
+
+    // Check if word ends in 'y' (and is preceded by a consonant)
+    // Example: 'Category' -> 'Categories', 'Quantity' -> 'Quantities'
+    // Note: Words like 'Day' or 'Boy' (vowel + y) just get an 's'
+    const isConsonantY = /[^aeiou]y$/i.test(word);
+
+    if (isConsonantY) {
+        return word.slice(0, -1) + 'ies';
+    }
+
+    // Standard pluralization
+    return `${word}s`;
+};
+
+/**
+ * Expands a cart array so that items with quantity > 1 
+ * become multiple individual objects in the list.
+ */
+const expandCartItems = (items) => {
+    // Exit early if there are no items
+    if (!items.length) return [];
+
+    return items.flatMap(item => {
+        // Create an array with length equal to the quantity
+        // and fill it with clones of the item
+        return Array.from({ length: item.quantity }, (_, index) => ({
+            ...item,
+            // We set quantity to 1 for each individual expanded item
+            quantity: 1,
+            // Optional: Give each a unique 'instanceId' for the printer/UI keys
+            instanceId: `${item.id}-unit-${index + 1}`
+        }));
+    });
+};
+
+const checkout = async (items) => {
+    // 1. Expand the cart items
+    const expandedItems = expandCartItems(items);
+    console.log('expandedItems', expandedItems);
+
+    // 2. Call the checkout API
+    // const response = await $api.user.checkout(expandedItems);
+    // console.log('response', response);
+    // 3. Emit the checkout event
+    emit('checkout', expandedItems);
 };
 </script>
 
@@ -77,11 +149,17 @@ const handleDecrement = (item) => {
             <div class="p-3 bg-white border-b border-stone-200 flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="flex justify-center bg-orange-500 p-2 rounded-2xl shadow-lg shadow-orange-200">
-                        <ShoppingBag class="text-white w-10" />
+                        <ShoppingCart class="text-white w-10" />
                     </div>
                     <div>
                         <h3 class="text-xl font-bold font-black text-stone-900 leading-none">My Cart</h3>
-                        <p class="text-sm text-stone-500 font-bold mt-1">{{ items.length }} Items</p>
+                        <div class="flex gap-2 items-center">
+                            <p class="text-sm"> <span class="text-orange-600 font-black font-bold">{{ items.length
+                                    }}</span> {{ pluralize(items.length, 'Item') }}</p>
+                            <p class="text-sm text-stone-500"> <span class="text-orange-600 font-black font-bold">{{
+                                totalItemsCount }}</span> {{ pluralize(totalItemsCount, 'Quantity') }}</p>
+
+                        </div>
                     </div>
                 </div>
                 <button @click="emit('close')"
@@ -90,7 +168,7 @@ const handleDecrement = (item) => {
                 </button>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
                 <div v-if="items.length === 0" class="h-full flex flex-col items-center justify-center text-center">
                     <div class="bg-stone-100 w-24 h-24 rounded-full flex items-center justify-center text-4xl mb-4">☕
                     </div>
@@ -101,21 +179,42 @@ const handleDecrement = (item) => {
                 <TransitionGroup name="list">
                     <div v-for="item in items" :key="item.id"
                         class="bg-white p-4 rounded-[2rem] border border-stone-100 shadow-sm flex gap-4 items-center mb-4 transition-all hover:shadow-md">
-
-                        <img :src="item.image" class="w-24 h-24 rounded-[1.5rem] object-cover flex-shrink-0" />
+                        <div class="">
+                            <img :src="item.image" class="w-24 h-24 rounded-[1.5rem] object-cover flex-shrink-0" />
+                            <p
+                                class="text-orange-600 font-black text-lg text-center font-bold  p-1 mt-3 bg-white border rounded-full">
+                                {{ formatCurrency(item.price) }}
+                            </p>
+                        </div>
 
                         <div class="flex-1">
                             <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <h4 class="font-black text-stone-800 text-lg leading-tight">{{ item.name }}</h4>
-                                    <p class="text-orange-600 font-bold text-sm">{{ formatCurrency(item.price) }}</p>
+                                <div class="">
+                                    <h4 class="font-black text-stone-800 text-xl leading-none tracking-tight">
+                                        {{ item.name }}
+                                    </h4>
+                                    <div class="flex flex-wrap gap-1 pt-2 justify-between">
+                                        <div v-if="item.mood"
+                                            class="flex items-center p-2 rounded-full text-[10px] font-black uppercase tracking-wider text-white shadow-sm"
+                                            :class="CONFIG.moods.find(m => m.id === item.mood)?.color || 'bg-stone-400'">
+                                            {{ item.mood }}
+                                        </div>
+                                        <div v-if="item.size"
+                                            class="flex w-3 items-center justify-center px-1.5 rounded-full text-[10px] font-black shadow-sm"
+                                            :class="sizeStyles[item.size] || 'bg-stone-100 text-stone-500'">
+                                            {{ item.size }}
+                                        </div>
+                                        <div v-if="item.sugar"
+                                            class="flex items-center p-1 rounded-full bg-white border border-stone-200 text-stone-500 text-[10px] font-black shadow-sm">
+                                            {{ item.sugar }}
+                                        </div>
+                                    </div>
                                 </div>
                                 <button @click="emit('remove-item', item.id)"
                                     class="cursor-pointer p-2 text-stone-300 text-red-400 hover:text-red-500 transition-colors">
                                     <Trash2 class="" />
                                 </button>
                             </div>
-
                             <div class="flex justify-between items-center mt-4">
                                 <div
                                     class="flex justify-center items-center bg-stone-100 rounded-xl p-1 border border-stone-200">
@@ -133,9 +232,8 @@ const handleDecrement = (item) => {
                                         <Plus class="w-7 h-7 text-orange-600" />
                                     </button>
                                 </div>
-
                                 <div class="text-right">
-                                    <p class="text-[10px] text-stone-400 uppercase font-black">Subtotal</p>
+                                    <p class="text-[10px] text-stone-400 uppercase font-black text-center">Subtotal</p>
                                     <span class="font-black text-stone-900 text-lg">
                                         {{ formatCurrency(toNum(item.price) * toNum(item.quantity)) }}
                                     </span>
@@ -145,7 +243,6 @@ const handleDecrement = (item) => {
                     </div>
                 </TransitionGroup>
             </div>
-
             <div class="p-3 bg-white border-t-2 border-stone-100 shadow-[0_-20px_40px_rgba(0,0,0,0.05)]">
                 <div class="space-y-4 my-2">
                     <div class="flex justify-between items-center">
@@ -156,16 +253,14 @@ const handleDecrement = (item) => {
                         <span class="text-stone-500 font-bold">Delivery Fee</span>
                         <span class="text-stone-900 font-black text-lg">{{ formatCurrency(deliveryFee) }}</span>
                     </div>
-
                     <div class="pt-4 border-t-2 border-dashed border-stone-200 flex justify-between items-center">
-                        <span class="text-xl font-black text-stone-900 uppercase tracking-tighter">Total Amount</span>
+                        <span class="text-xl font-black text-stone-900 tracking-tighter">Total Amount</span>
                         <span class="text-3xl font-black text-orange-600 tracking-tighter">
                             {{ formatCurrency(total) }}
                         </span>
                     </div>
                 </div>
-
-                <PriButton @click="emit('checkout')" :disabled="items.length === 0" class="w-full p-3">
+                <PriButton @click="checkout(items)" :disabled="items.length === 0" class="w-full p-3">
                     <span>Complete Order</span>
                 </PriButton>
             </div>

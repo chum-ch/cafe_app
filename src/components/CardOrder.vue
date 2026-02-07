@@ -38,9 +38,9 @@ const sizeStyles = {
 };
 
 // State
-const selectedSize = ref('M');
-const selectedMood = ref('cold');
-const selectedSugar = ref('50%');
+const selectedSize = ref(CONFIG.sizes[1]);
+const selectedMood = ref(CONFIG.moods[1].id);
+const selectedSugar = ref(CONFIG.sugarLevels[CONFIG.sugarLevels.length - 1]);
 
 const handleAddToCart = () => {
   const item = {

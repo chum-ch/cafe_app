@@ -48,9 +48,9 @@ const onFormSubmit = async (e) => {
             Email: emailLogin.value,
             OtpCode: Number(formData.value.Passcode)
         };
-        console.log('payload', payload);
+        // console.log('payload', payload);
         const response = await $api.user.verifyOtp(payload);
-        console.log('response', response);
+        // console.log('response', response);
 
 
         // 2. Update Store (Unlock the Set Password route)
@@ -119,7 +119,7 @@ const onFormSubmit = async (e) => {
                 <div class="pt-2">
                     <PriButton type="submit" label="Verify & Proceed"
                         class="style-slide-up w-full py-3.5 text-lg shadow-lg shadow-primary/20" :loading="loading"
-                        icon="pi pi-check-circle" :disabled="formData.Passcode.length !== 6" />
+                        icon="pi pi-check-circle" :disabled="formData.Passcode.length !== 6 || loading" />
                 </div>
 
                 <div class="text-center w-full">
