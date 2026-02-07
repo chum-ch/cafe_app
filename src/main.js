@@ -40,6 +40,7 @@ import Textarea from "primevue/textarea";
 import MultiSelect from 'primevue/multiselect';
 import Select from 'primevue/select';
 import Divider from 'primevue/divider';
+import Dialog from 'primevue/dialog';
 
 import OtpForm from './components/forms/OtpForm.vue';
 import SetAndResetPwd from './components/forms/SetAndResetPwdForm.vue';
@@ -72,6 +73,7 @@ app.component('PriTextarea', Textarea);
 app.component('PriMultiSelect', MultiSelect);
 app.component('PriSelect', Select);
 app.component('PriDivider', Divider)
+app.component('PriDialog', Dialog)
 
 
 app.component('OtpForm', OtpForm)

@@ -104,7 +104,7 @@ const getTooltip = (label) => {
 
 <template>
   <aside 
-    class="h-screen bg-slate-900 text-slate-300 flex flex-col transition-all duration-300 ease-in-out shadow-xl relative"
+    class="h-sreen bg-slate-900 text-slate-300 flex flex-col transition-all duration-300 ease-in-out shadow-xl relative"
     :class="[isCollapsed ? 'w-20' : 'w-72']"
   >
     

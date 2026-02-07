@@ -7,7 +7,8 @@ import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
 import { Search, Filter } from 'lucide-vue-next';
 import CardOrder from '@/components/CardOrder.vue';
-
+import CartDrawer from './CartDrawer.vue';
+import { ShoppingBag } from 'lucide-vue-next';
 // --- Data ---
 const coffees = ref([
   {
@@ -79,17 +80,43 @@ const filteredCoffees = computed(() => {
   return result;
 });
 
-const addToCart = (item) => console.log('item', item);
+// const addToCart = (item) => console.log('item', item);
 
-const clearFilters = () => {
-  searchQuery.value = '';
-  selectedSort.value = null;
+const isCartOpen = ref(false);
+const cartItems = ref([]);
+
+// 1. Add to Cart Logic
+const addToCart = (product) => {
+  const quantity = 1;
+  const index = cartItems.value.findIndex(item => item.id === product.id);
+  if (index !== -1) {
+    cartItems.value[index].quantity += quantity;
+  } else {
+    cartItems.value.push({ ...product, quantity });
+  }
+  isCartOpen.value = true; // Auto-open cart when item added
+  // console.log('Create', index);
+  // console.log('Items', cartItems.value);
 };
 
-// Check if any filter is active
-const isFilterActive = computed(() => {
-  return searchQuery.value.length > 0 || selectedSort.value !== null;
-});
+const updateQuantity = ({ id, amount }) => {
+  // console.log('Update ',{ id, amount });
+  const item = cartItems.value.find(i => i.id === id);
+  if (item) {
+    // Modify existing item quantity
+    item.quantity = Number(item.quantity) + amount;
+
+    // Safety: don't let it go below 1
+    if (item.quantity < 1) item.quantity = 1;
+  }
+};
+
+// 3. Delete Item
+const removeItem = (id) => {
+  // Using filter creates a new array reference, which Vue definitely tracks
+  cartItems.value = cartItems.value.filter(item => item.id !== id);
+};
+
 </script>
 
 <template>
@@ -112,7 +139,6 @@ const isFilterActive = computed(() => {
             </Select>
           </div>
         </div>
-
       </div>
     </div>
 
@@ -126,8 +152,18 @@ const isFilterActive = computed(() => {
         <h3 class="text-xl font-bold text-stone-600">No coffees found</h3>
         <p class="text-stone-400">Try adjusting your search or filters.</p>
       </div>
+
     </div>
 
+
+    <PriButton @click="isCartOpen = true"
+      class=" text-white fixed bottom-[10rem] right-4 p-2 shadow-lg shadow-purple-200/50 hover:shadow-purple-200/100 active:scale-95 transition-all duration-300">
+      <ShoppingBag class="" />
+      <span class="font-bold ">{{ cartItems.length }}</span>
+    </PriButton>
+
+    <CartDrawer :is-open="isCartOpen" :items="cartItems" @close="isCartOpen = false" @update-quantity="updateQuantity"
+      @remove-item="removeItem" @checkout="console.log('Proceed to Payment', cartItems)" />
   </div>
 </template>
 
