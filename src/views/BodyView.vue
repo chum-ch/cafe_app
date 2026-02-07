@@ -71,6 +71,7 @@ const handleRegister = () => router.push({ name: 'register' });
     <main class="flex-grow">
       <section class="relative my-3 overflow-hidden from-amber-50 via-white to-white">
         <div class="max-w-5xl mx-auto px-6 text-center">
+
            <!-- <span
             class="inline-block py-1.5 px-4 rounded-full bg-amber-100/50 text-amber-700 text-sm font-semibold mb-6 border border-amber-200">
             Version 2.0 Now Live
