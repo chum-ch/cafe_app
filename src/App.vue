@@ -76,7 +76,7 @@ const isCollapsedSidebar = ref(true);
 
 <template>
   <div class="min-h-screen bg-slate-50 font-sans text-slate-900">
-    <PriToast position="top-center" />
+    <PriToast position="top-center" class="w-full p-2" />
     
     <MainCafe>
       <template #header>
