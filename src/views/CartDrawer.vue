@@ -144,7 +144,7 @@ const checkout = async (items) => {
                         <h3 class="text-xl font-bold font-black text-stone-900 leading-none">My Cart</h3>
                         <div class="flex gap-2 items-center">
                             <p class="text-sm"> <span class="text-orange-600 font-black font-bold">{{ items.length
-                                    }}</span> {{ pluralize(items.length, 'Item') }}</p>
+                            }}</span> {{ pluralize(items.length, 'Item') }}</p>
                             <p class="text-sm text-stone-500"> <span class="text-orange-600 font-black font-bold">{{
                                 totalItemsCount }}</span> {{ pluralize(totalItemsCount, 'Quantity') }}</p>
 
@@ -167,63 +167,74 @@ const checkout = async (items) => {
 
                 <TransitionGroup name="list">
                     <div v-for="item in items" :key="item.id"
-                        class="bg-white p-4 rounded-[2rem] border border-stone-100 shadow-sm flex gap-4 items-center mb-4 transition-all hover:shadow-md">
-                        <div class="">
-                            <img :src="item.image" class="w-24 h-24 rounded-[1.5rem] object-cover flex-shrink-0" />
-                            <p
-                                class="text-orange-600 font-black text-lg text-center font-bold  p-1 mt-3 bg-white border rounded-full">
-                                {{ formatCurrency(item.price) }}
-                            </p>
+                        class="bg-white p-4 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col sm:flex-row gap-4 items-center mb-4 transition-all hover:shadow-md relative overflow-hidden">
+
+                        <div class="relative shrink-0">
+                            <img :src="item.image" class="w-28 h-28 rounded-[1.5rem] object-cover shadow-inner" />
+                            <div
+                                class="absolute -bottom-2 -right-2 px-3 py-1 rounded-full ring-4 ring-white shadow-md"
+                                :class="sizeStyles[item.size] || 'bg-orange-500'"
+                                >
+                                <p class="text-white font-black text-sm tabular-nums">
+                                    {{ formatCurrency(item.price) }}
+                                </p>
+                            </div>
                         </div>
 
-                        <div class="flex-1">
-                            <div class="flex justify-between items-start mb-2">
-                                <div class="">
+                        <div class="flex-1 w-full">
+                            <div class="flex justify-between items-start">
+                                <div>
                                     <h4 class="font-black text-stone-800 text-xl leading-none tracking-tight">
                                         {{ item.name }}
                                     </h4>
-                                    <div class="flex flex-wrap gap-1 pt-2">
+
+                                    <div class="flex flex-wrap gap-2 mt-3">
                                         <div v-if="item.mood"
-                                            class="flex items-center p-2 rounded-full text-[10px] font-black uppercase tracking-wider text-white shadow-sm"
+                                            class="flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-sm"
                                             :class="CONFIG.moods.find(m => m.id === item.mood)?.color || 'bg-stone-400'">
                                             {{ item.mood }}
                                         </div>
+
                                         <div v-if="item.size"
-                                            class="flex w-3 items-center justify-center px-1.5 rounded-full text-[10px] font-black shadow-sm"
-                                            :class="sizeStyles[item.size] || 'bg-stone-100 text-stone-500'">
+                                            class="flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-black uppercase border shadow-sm"
+                                            :class="sizeStyles[item.size] || 'bg-stone-100 text-stone-500 border-stone-200'">
                                             {{ item.size }}
                                         </div>
+
                                         <div v-if="item.sugar"
-                                            class="flex items-center p-1 rounded-full bg-white border border-stone-200 text-stone-500 text-[10px] font-black shadow-sm">
+                                            class="flex items-center px-3 py-1 rounded-full bg-white border border-stone-200 text-stone-500 text-[10px] font-black shadow-sm uppercase">
                                             {{ item.sugar }}
                                         </div>
                                     </div>
                                 </div>
+
                                 <button @click="emit('remove-item', item.id)"
-                                    class="cursor-pointer p-2 text-stone-300 text-red-400 hover:text-red-500 transition-colors">
-                                    <Trash2 class="" />
+                                    class="cursor-pointer p-2 text-red-400 hover:text-red-500 transition-colors">
+                                    <Trash2 :size="20" />
                                 </button>
                             </div>
-                            <div class="flex justify-between items-center mt-4">
+
+                            <div class="flex justify-between items-end mt-5">
                                 <div
-                                    class="flex justify-center items-center bg-stone-100 rounded-xl p-1 border border-stone-200">
+                                    class="flex items-center bg-stone-100 rounded-2xl p-2 gap-1 border border-stone-200">
                                     <button @click="handleDecrement(item)" :disabled="toNum(item.quantity) <= 1"
-                                        class=" cursor-pointer w-10 h-10 flex items-center justify-center rounded-lg bg-orange-100 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-200 transition-all duration-300">
-                                        <Minus class="w-7 h-7 text-orange-400" />
+                                        class="cursor-pointer w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-red-50 hover:text-red-500 transition-all active:scale-90">
+                                        <Minus class="w-5 h-5" />
                                     </button>
 
-                                    <span class="font-black text-lg text-amber-600 font-bold min-w-[45px] text-center">
+                                    <span class="font-black text-center text-xl text-stone-800 text-center p-1">
                                         {{ toNum(item.quantity) }}
                                     </span>
 
                                     <button @click="handleIncrement(item)"
-                                        class="cursor-pointer w-10 h-10 flex items-center justify-center rounded-lg bg-orange-200 shadow-sm hover:bg-orange-300 transition-all duration-300">
-                                        <Plus class="w-7 h-7 text-orange-600" />
+                                        class="cursor-pointer w-10 h-10 flex items-center justify-center rounded-xl bg-orange-500 text-white shadow-md shadow-orange-200 hover:bg-orange-600 transition-all active:scale-90">
+                                        <Plus class="w-5 h-5" />
                                     </button>
                                 </div>
-                                <div class="text-right px-1">
-                                    <p class="text-[10px] text-stone-400 uppercase font-black text-center">Subtotal</p>
-                                    <span class="font-black text-stone-900 text-lg">
+
+                                <div class="text-right">
+                                    <p class="text-[14px] text-stone-400 uppercase font-black">Subtotal</p>
+                                    <span class="font-black text-orange-600 text-xl">
                                         {{ formatCurrency(toNum(item.price) * toNum(item.quantity)) }}
                                     </span>
                                 </div>
@@ -232,6 +243,7 @@ const checkout = async (items) => {
                     </div>
                 </TransitionGroup>
             </div>
+
             <div class="p-3 bg-white border-t-2 border-stone-100 shadow-[0_-20px_40px_rgba(0,0,0,0.05)]">
                 <div class="space-y-4 my-2">
                     <div class="flex justify-between items-center">

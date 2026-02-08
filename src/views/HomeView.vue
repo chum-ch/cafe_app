@@ -13,6 +13,10 @@ import { ShoppingCart } from 'lucide-vue-next';
 const coffees = ref([
   {
     id: 1,
+    mood: 'hot',
+    size: 'M',
+    sugar: '30%',
+    quantity: 1000,
     name: 'Caramel Frappuccino',
     price: 3.95,
     category: 'Blended',
@@ -83,7 +87,7 @@ const filteredCoffees = computed(() => {
 // const addToCart = (item) => console.log('item', item);
 
 const isCartOpen = ref(false);
-const cartItems = ref([]);
+const cartItems = ref([coffees.value[0]]);
 
 // 1. Add to Cart Logic
 const addToCart = (product) => {
