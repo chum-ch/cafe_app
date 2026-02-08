@@ -208,9 +208,9 @@ const checkout = async (items) => {
                                     </div>
                                 </div>
 
-                                <button @click="emit('remove-item', item.id)"
-                                    class="cursor-pointer p-2 text-red-400 hover:text-red-500 transition-colors">
-                                    <Trash2 :size="20" />
+                                <button
+                                    class="p-2 text-red-400 hover:text-red-500 transition-colors">
+                                    <Trash2 :size="20" @click="emit('remove-item', item.id)" class="cursor-pointer" />
                                 </button>
                             </div>
 
@@ -218,7 +218,7 @@ const checkout = async (items) => {
                                 <div
                                     class="flex items-center bg-stone-100 rounded-2xl p-2 gap-1 border border-stone-200">
                                     <button @click="handleDecrement(item)" :disabled="toNum(item.quantity) <= 1"
-                                        class="cursor-pointer w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-red-50 hover:text-red-500 transition-all active:scale-90">
+                                        class="cursor-pointer w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-50 hover:text-indigo-500 transition-all active:scale-90">
                                         <Minus class="w-5 h-5" />
                                     </button>
 
@@ -227,7 +227,7 @@ const checkout = async (items) => {
                                     </span>
 
                                     <button @click="handleIncrement(item)"
-                                        class="cursor-pointer w-10 h-10 flex items-center justify-center rounded-xl bg-orange-500 text-white shadow-md shadow-orange-200 hover:bg-orange-600 transition-all active:scale-90">
+                                        class="cursor-pointer w-10 h-10 flex items-center justify-center rounded-xl bg-indigo-400 text-white shadow-md shadow-indigo-200 hover:bg-indigo-600 transition-all active:scale-90">
                                         <Plus class="w-5 h-5" />
                                     </button>
                                 </div>

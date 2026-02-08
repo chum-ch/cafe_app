@@ -74,7 +74,7 @@ const getTooltip = (label) => isCollapsed.value ? { value: label, showDelay: 200
       class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 transition-all"></div>
   </Transition>
 
-  <aside class="z-40 my-2 radius bg-slate-900 transition-all duration-300 shadow-xl"
+  <aside class="z-40 my-2 radius bg-slate-900 transition-all duration-300 shadow-xl mr-2"
    :class="[
     isCollapsed
       ? 'relative w-20'
@@ -95,7 +95,7 @@ const getTooltip = (label) => isCollapsed.value ? { value: label, showDelay: 200
     </div>
 
     <nav class="flex-1 overflow-y-auto px-3 space-y-2">
-      <div v-for="item in menuItems" :key="item.key" class="">
+      <div v-for="item in menuItems" :key="item.key" class="text-slate-400">
         <div @click="handleMenuClick(item)" v-tooltip.right="getTooltip(item.label)"
           class="group mt-2 flex justify-center items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200"
           :class="[isActive(item) ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/40' : 'hover:bg-slate-800 hover:text-white']">
@@ -104,7 +104,7 @@ const getTooltip = (label) => isCollapsed.value ? { value: label, showDelay: 200
             :class="[isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto']">
             <span class="font-medium text-sm whitespace-nowrap">{{ item.label }}</span>
             <ChevronRight v-if="item.children" :size="14" class="transition-transform"
-              :class="{ 'rotate-90': expandedMenus[item.key] }" />
+              :class="{ 'rotate-45': expandedMenus[item.key] }" />
           </div>
         </div>
 
@@ -165,7 +165,7 @@ nav::-webkit-scrollbar {
 }
 
 nav::-webkit-scrollbar-thumb {
-  background: #334155;
+  /* background: #334155; */
   border-radius: 10px;
 }
 </style>
