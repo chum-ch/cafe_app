@@ -75,7 +75,7 @@ const isCollapsedSidebar = ref(true);
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 font-sans text-slate-900">
+  <div class="min-h-screen font-sans">
     <PriToast position="top-center" class="w-full p-2" />
     
     <MainCafe>
@@ -119,9 +119,9 @@ const isCollapsedSidebar = ref(true);
   /* Strong blur for frosted glass look */
 }
 
-nav a.router-link-exact-active {
+/* nav a.router-link-exact-active {
   color: var(--color-text);
-}
+} */
 
 nav a.router-link-exact-active:hover {
   background-color: transparent;

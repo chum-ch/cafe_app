@@ -91,7 +91,8 @@ const onFormSubmit = async (e) => {
                 </p>
             </div>
 
-            <Form :initialValues="formData" @submit="onFormSubmit" class="flex flex-col gap-4">
+            <Form :initialValues="formData" @submit="onFormSubmit" class="flex flex-col gap-4"
+                :validateOnValueUpdate="true" :validateOnBlur="true">
 
                 <div class="flex flex-col items-center w-full">
                     <div class="otp-input-wrapper  sm:scale-100">

@@ -1,109 +1,323 @@
+<script setup>
+import { ref, computed } from "vue";
+import { Form } from "@primevue/forms";
+import { zodResolver } from "@primevue/forms/resolvers/zod";
+import { z } from "zod";
+import {
+  User,
+  Mail,
+  ShieldUser,
+  ShieldCheck,
+  Phone, Shield
+} from 'lucide-vue-next';
+const isSubmitting = ref(false);
+
+
+
+// Ensure role starts as an empty string or undefined so Zod treats it as missing, not "wrong type"
+const initialValues = ref({
+  fullName: "",
+  email: "",
+  role: "",
+  status: "Active",
+  phoneNumber: ""
+});
+
+const resolver = zodResolver(
+  z.object({
+    fullName: z.string().min(1, "Full name is required."),
+    email: z.string().min(1, "Email is required").email("Invalid email address."),
+    role: z.string().min(1, "Please select a user role."),
+    status: z.string().min(1, "Status is required"),
+    phoneNumber: z.string()
+      .min(1, "Phone number is required.")
+      .refine((val) => {
+        const cleaned = val.replace(/\s/g, "");
+        return /^0\d{8,9}$/.test(cleaned);
+      }, "Must start with 0 and be a valid Cambodian number.")
+  })
+);
+
+const onFormSubmit = async (e) => {
+  if (!e.valid) return;
+  isSubmitting.value = true;
+
+  try {
+    console.log("Validated Data:", e.values);
+    // API Call here
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+const roles = ref(['Admin', 'Barista', 'Manager']);
+const statuses = ref(['Active', 'On Break', 'Inactive']);
+const visible = ref(false);
+const searchQuery = ref(""); // New Search Ref
+
+// Example data based on your initialValues structure
+const users = ref([
+  {
+    fullName: "Alex Rivera",
+    email: "alex@cafe.com",
+    role: "Admin",
+    status: "Active",
+    phoneNumber: "012 345 678",
+    avatar: "https://i.pravatar.cc/150?u=1"
+  },
+  {
+    fullName: "Alex Rivera",
+    email: "alex@cafe.com",
+    role: "Admin",
+    status: "Active",
+    phoneNumber: "012 345 678",
+    avatar: "https://i.pravatar.cc/150?u=1"
+  },
+  {
+    fullName: "Sarah Chen",
+    email: "sarah@cafe.com",
+    role: "Barista",
+    status: "On Break",
+    phoneNumber: "099 888 777",
+    avatar: "https://i.pravatar.cc/150?u=2"
+  },
+  {
+    fullName: "Mike Ross",
+    email: "mike@cafe.com",
+    role: "Manager",
+    status: "Inactive",
+    phoneNumber: "010 555 444",
+    avatar: "https://i.pravatar.cc/150?u=3"
+  }
+]);
+
+// Helper to style status badges
+const getStatusSeverity = (status) => {
+  switch (status) {
+    case 'Active': return 'success';
+    case 'On Break': return 'warn';
+    case 'Inactive': return 'danger';
+    default: return 'info';
+  }
+};
+
+// --- ADVANCED SEARCH FILTER ---
+const filteredUsers = computed(() => {
+  if (!searchQuery.value.trim()) return users.value;
+
+  const query = searchQuery.value.toLowerCase();
+
+  return users.value.filter(user => {
+    return (
+      user.fullName.toLowerCase().includes(query) ||
+      user.email.toLowerCase().includes(query) ||
+      user.role.toLowerCase().includes(query) ||
+      user.status.toLowerCase().includes(query) ||
+      user.phoneNumber.toLowerCase().includes(query)
+    );
+  });
+});
+
+
+</script>
+
 <template>
-  <div class="style-glass-back">
-    <h1>This is an users page</h1>
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse quidem cumque, atque, commodi quas eveniet neque natus id dolorem blanditiis quo exercitationem tempore hic quia repudiandae vero, sit adipisci temporibus?
-    Esse quisquam nulla cum sed, earum temporibus. Voluptatum, incidunt. Voluptas, libero voluptatibus. Deleniti veniam veritatis ut atque debitis nisi voluptatibus, commodi voluptatem quia soluta repudiandae ad mollitia! Ex, dignissimos sequi.
-    Sapiente neque suscipit perferendis debitis. Cum saepe quaerat aspernatur ab illum beatae, fugiat vitae tempora quos maxime enim incidunt delectus, recusandae ut! Temporibus ipsum excepturi quam repellendus ab exercitationem deleniti.
-    Voluptate dignissimos nesciunt, alias ipsam temporibus minus eaque eligendi reprehenderit unde nihil beatae odit laborum ex eveniet deleniti officiis officia id et distinctio. Repellendus corrupti officiis voluptatem tempora deserunt iure.
-    Doloremque ipsam commodi dolore doloribus quia laborum voluptatibus nesciunt blanditiis distinctio sunt? Nesciunt quisquam exercitationem maxime rerum illo. Tempore iure consequuntur vero rem autem eveniet, assumenda veniam unde ut ducimus?
-    Fuga quae facilis ipsam ipsum, commodi inventore exercitationem nesciunt! Necessitatibus ducimus inventore suscipit sed assumenda tenetur, quibusdam sunt amet incidunt cupiditate accusamus error molestiae vero ipsum quo ab obcaecati quidem.
-    Quibusdam illum rerum incidunt tempore placeat perspiciatis eligendi numquam odit dolore, accusantium laboriosam beatae tempora? Rem, eum est eius consectetur iusto quod ab, temporibus provident maiores nulla distinctio assumenda culpa.
-    Quod sit in error beatae magnam. Ab numquam consequuntur harum soluta quae in eveniet quaerat, ipsa quidem debitis culpa delectus temporibus quam quibusdam laudantium, veritatis quo repudiandae blanditiis iusto aperiam.
-    Dolore aliquid laudantium commodi itaque placeat, dignissimos ipsum recusandae. In itaque labore ut id, architecto dolorum sapiente nam ullam quo ipsum nesciunt tempore facere adipisci suscipit qui obcaecati eum pariatur.
-    Iusto, eligendi, reprehenderit nam sint sequi facere, aspernatur dolores tempore autem dolorum eaque earum distinctio. Commodi, laboriosam fugit, accusantium unde officia consequuntur possimus, earum non quia rem dolore omnis aut!
-    Explicabo vel sapiente soluta illum. Cupiditate sit nisi necessitatibus rerum et numquam a est iure aperiam ratione dolores accusantium unde, obcaecati assumenda temporibus vero earum nemo eum? Iste, voluptatibus obcaecati!
-    Assumenda in maiores dolores voluptates omnis placeat, itaque veritatis deleniti sequi ipsum architecto dignissimos ab nisi, rerum ex, sed exercitationem repellendus error eveniet tempore. Excepturi earum soluta nesciunt architecto deleniti?
-    Quod, eum eaque adipisci perferendis quia perspiciatis obcaecati fugit ad harum voluptatem! Distinctio maiores vero excepturi illo! Officiis asperiores aliquam saepe! Ipsum dolorem eum, delectus consectetur officia dignissimos accusantium iure.
-    Sapiente vel, voluptatem harum non, quidem nobis nihil repellat voluptatibus quibusdam accusamus eos. Ullam, nesciunt voluptatibus a corrupti reiciendis molestiae numquam, non totam animi eligendi accusamus quam laudantium. Totam, itaque!
-    Accusantium nihil, nostrum excepturi quasi consequatur provident eaque mollitia expedita itaque cupiditate aspernatur inventore consequuntur quae ipsa voluptas aperiam, veniam fugiat atque tenetur autem! Atque sequi nostrum cupiditate eaque fugit?
-    Commodi earum harum odio? Voluptas adipisci fugiat laboriosam, delectus expedita hic at provident quam quia, ut voluptate voluptatibus consequuntur? Distinctio dolorum est eveniet ut corporis. Fuga et assumenda saepe nesciunt.
-    Blanditiis a et illo totam? Ab, illum dolorem! Enim cum quisquam perferendis eius accusantium repudiandae quidem, facere asperiores vero animi nam et laboriosam error porro consequatur eveniet dolorum impedit tempora.
-    Impedit enim pariatur, culpa consequatur ea quasi a vitae iusto eaque non debitis atque blanditiis odit, molestiae explicabo voluptate consequuntur sunt in quam iste ipsum tempore dicta voluptatibus? Repellendus, impedit!
-    Rem ducimus praesentium officiis voluptates ex perferendis ratione, deleniti blanditiis et eius recusandae minima fugit vitae tempora incidunt veniam similique! Repellendus qui perferendis accusamus quam iste praesentium veritatis libero placeat.
-    Reprehenderit minus repudiandae voluptate dolore harum sed eius quidem perferendis ducimus corrupti ullam hic eum sit voluptates facilis dolorem quae expedita quasi, at ipsa aut. Rem sequi iste expedita repudiandae!
-    Beatae molestias consectetur magnam quaerat quae nihil harum deserunt ad minus temporibus fugiat officiis commodi eum ut iste, nobis placeat reiciendis atque sapiente eius corporis cumque omnis asperiores eos. Labore.
-    Nostrum, atque consectetur. Magnam aspernatur repellat eveniet distinctio, assumenda dolore blanditiis cupiditate alias facilis nostrum corrupti sunt architecto in praesentium ut libero aliquid nulla? Modi veniam voluptatibus mollitia rerum quae.
-    Dolores veniam est enim odit exercitationem ut rerum, ipsum iusto quo ipsa! Possimus illo eius dignissimos modi impedit quas doloribus reiciendis minus officia nesciunt, similique quasi sit reprehenderit consequuntur sequi!
-    Fugiat ratione inventore quis perferendis! Iste dicta laborum perspiciatis, pariatur nam hic vel, excepturi ab, saepe accusamus dolore? Sunt ex voluptatem dolor quia cumque illo praesentium? Consectetur odio perferendis cum?
-    Doloremque quis sit, exercitationem iure quo, sapiente magnam consequatur laudantium vitae minus alias placeat ducimus unde et sunt accusantium. Aliquid animi eos voluptatem temporibus excepturi reprehenderit, accusantium suscipit. Quisquam, harum?
-    Itaque aliquam possimus vero earum adipisci odit nostrum delectus sapiente. Quasi minus dolore suscipit earum ullam esse molestiae assumenda est eligendi, iusto dolores at aperiam corrupti, dolorem hic laboriosam neque.
-    Reprehenderit obcaecati ex nostrum minima eveniet facilis veritatis dolor hic? Dolorem cupiditate vel illum laborum ab delectus rerum deleniti esse architecto, nemo facere et, libero sit neque maxime aspernatur. Laboriosam.
-    Hic eveniet explicabo dolorem odit omnis maxime, necessitatibus excepturi ratione officia vero mollitia tenetur illum eos non officiis! Magni ratione autem neque soluta possimus provident eius, magnam quos harum! Fugiat.
-    Perferendis ex non necessitatibus accusamus ipsum corporis nemo eaque doloremque quasi architecto, earum adipisci aliquid neque fugit suscipit, dolorem molestiae tempore aspernatur. Corrupti consequuntur ipsa, corporis incidunt officiis eligendi dolor.
-    Odio, aut tempore? Ducimus autem dolores architecto asperiores facere nam? Ullam ab soluta aspernatur architecto dolorem eligendi, ducimus magnam, numquam iure aliquam commodi eos eveniet illum. Voluptate dolore amet excepturi.
-    Animi doloremque voluptatum sint, quisquam odio iusto! Non aspernatur nesciunt quis doloremque quae ipsum dolorem repudiandae vel optio laudantium blanditiis reprehenderit voluptatibus, quibusdam tempore itaque debitis inventore fugiat iusto voluptates?
-    Nostrum quam nulla impedit porro optio esse libero, odio dolore dolores hic vitae est eius, mollitia voluptate maxime tempora maiores eaque quis? Nobis, assumenda necessitatibus accusamus adipisci eos debitis itaque.
-    Ea, deserunt iusto beatae saepe inventore magnam dolore omnis consectetur nam adipisci quam maxime assumenda repudiandae nihil et non eveniet ut ipsam exercitationem voluptatum soluta. Fuga dolore dolorem aliquid porro?
-    Harum dolores laudantium totam eius culpa sapiente, sit at quos, quam magnam facilis tempora numquam quia porro dolore itaque officia quasi neque expedita ea sunt ipsum! Doloremque amet ex nesciunt.
-    Dolore, eum architecto. Consequuntur fugit voluptate quae, voluptatibus ratione ipsum inventore placeat officiis modi! Corrupti natus error at eius, nisi corporis suscipit quis minima aspernatur soluta voluptas possimus. Adipisci, autem?
-    Et vero eius sequi veniam hic dicta quas, atque rerum consectetur, dolor quo laboriosam voluptas possimus eum esse. Temporibus voluptatum perferendis voluptatem quia aperiam dolore beatae at culpa placeat facere!
-    Error harum expedita iure? Distinctio veritatis, quos error iure maiores odio sed fugiat consequuntur, nemo saepe soluta modi nihil illum cupiditate sunt laborum deleniti? Explicabo, placeat. Temporibus distinctio consequatur officia.
-    Impedit sapiente, enim quia aliquam modi totam labore. Officiis iste eum magnam quos dolorem dignissimos, quia sit fugit error quis vero deleniti, porro velit nostrum perspiciatis veritatis iure delectus quod?
-    Quia soluta nulla vitae. Nisi amet, adipisci iure rem, dolore aliquid vel, sunt tempore nostrum accusantium reiciendis distinctio iusto dolorum non placeat aut illo eveniet excepturi ducimus illum iste tempora.
-    Alias, aspernatur? Reprehenderit eius non, ullam cumque tempore aut placeat, modi exercitationem saepe mollitia eligendi impedit beatae neque architecto? Quos facere autem eaque explicabo quasi corrupti ipsa delectus veritatis maxime?
-    Reiciendis, dicta! Voluptatum, quidem libero? Velit, modi! Ipsa, numquam non exercitationem minus laudantium, aliquid dignissimos quasi animi, cumque voluptatum magnam iste ratione laboriosam. Aspernatur voluptates tempore id, debitis iste dolorum?
-    Corporis odit nesciunt, cum adipisci blanditiis harum iste consectetur enim eaque tempore illum obcaecati hic quis aut? Quidem earum ad quae, culpa nesciunt veniam, magni soluta facilis error velit deleniti?
-    Molestiae, sequi? Eveniet temporibus numquam quis molestias tempora perferendis, libero, et harum, voluptas nobis quos nostrum esse cumque. Laudantium maxime nobis vero, iure perferendis odit eum veritatis rem dolore? Placeat?
-    Repellendus est et ipsum magni sint, asperiores perferendis quasi tempora ipsam reprehenderit praesentium molestias maiores quae facere incidunt rerum velit maxime reiciendis! Voluptate saepe architecto ex dicta tempora deleniti sit?
-    Iste, expedita consectetur ipsa soluta aut itaque unde cupiditate adipisci, blanditiis facere voluptatibus fuga omnis ratione distinctio maiores minima eveniet exercitationem animi repellat debitis vel autem dolore! Ratione, impedit suscipit.
-    Qui vero cupiditate similique hic consectetur consequuntur beatae quas ex illum a possimus cum, iste quasi fuga dolorum reiciendis cumque fugit aut voluptatem. Quis, deleniti cum iste explicabo quae soluta.
-    Nulla totam praesentium tempora nihil officiis iusto, ipsa quasi exercitationem numquam sit vel ducimus eaque reprehenderit expedita repudiandae ad fugiat vero, dolores, blanditiis quae hic adipisci cum! Laudantium, doloremque voluptates?
-    Rerum doloremque iste laudantium perspiciatis fuga. Incidunt nostrum qui illo maxime, sunt placeat tempora voluptates possimus quis tempore. Soluta eum doloremque in culpa cumque suscipit dolore aspernatur omnis expedita corrupti?
-    Labore velit ut eligendi, nemo excepturi quasi dicta eaque quos, alias maxime facilis assumenda accusantium pariatur enim veritatis nam minus molestias necessitatibus delectus suscipit soluta exercitationem asperiores! Perspiciatis, dicta dolor.
-    Dolor, excepturi repudiandae. Numquam porro sequi, non repellendus praesentium illum tempora expedita et fugiat ipsum ipsa, at delectus officia saepe eum, quasi earum veniam eius nam a modi! Ea, optio.
-    Voluptate temporibus magnam voluptas expedita eius labore, iste porro dolorem voluptatum sit, quos quaerat. Quia officiis beatae pariatur architecto sint ullam, excepturi aspernatur facilis eius, cumque veniam libero in neque!
-    Quo aperiam, ipsum doloremque adipisci, animi consequatur minima ducimus nemo aliquid expedita quaerat ratione temporibus recusandae modi? Voluptas dolor nobis laboriosam labore voluptate voluptates et aliquid, possimus nemo reprehenderit ab.
-    Excepturi deleniti reprehenderit ab optio veniam similique quae quaerat, alias assumenda ad nostrum, natus fuga. Sit dolores fugit fugiat ea laborum tempora neque. Cum nulla, earum libero fuga sint fugit.
-    Hic sint, numquam asperiores iste ullam doloribus esse delectus quibusdam expedita eius, magnam fuga provident nesciunt iure omnis est soluta, dignissimos nostrum unde perferendis! Iure laudantium magni vero ex libero!
-    Voluptates dolores modi vitae, aut atque corporis itaque quam temporibus! Dignissimos aliquam ut velit fugit mollitia odit deserunt, vel nihil veniam vero exercitationem nobis saepe ea nam alias, rem incidunt?
-    Unde sapiente magni, maiores omnis reprehenderit adipisci, libero dolor expedita quasi eum natus soluta deserunt dolorem cupiditate dolorum error sit aliquid consequuntur. Ut provident veniam blanditiis dolorum neque doloribus reiciendis.
-    Placeat dolorum eum officiis nisi repellat ullam nam a odit ad, quaerat tempore blanditiis in eos! Perferendis doloremque cum beatae, deserunt cumque voluptas tempore at mollitia excepturi obcaecati. Minima, rem.
-    Neque nihil deleniti consequatur sed officia possimus est, obcaecati itaque adipisci cumque consequuntur praesentium optio eveniet veritatis quae numquam minus labore voluptatum, maxime quidem in nobis quaerat. Illum, consectetur ipsum.
-    Nulla, est. In perferendis adipisci veniam suscipit ipsam consequuntur, rerum sunt similique vel magni quidem accusantium odit rem, veritatis itaque! Ipsa aliquam explicabo eligendi itaque atque iusto omnis fugiat deleniti?
-    Magnam ab facere reiciendis minus corporis nobis labore ut veniam recusandae, assumenda repudiandae ullam at molestiae cumque possimus fugit quis, voluptatum voluptate quaerat necessitatibus? Dolor sint quaerat quis id eveniet.
-    Velit rem ipsam praesentium aspernatur reiciendis placeat rerum dolorum eum? Commodi quod reiciendis, sit odio rerum reprehenderit dignissimos quam. Quo est cumque quaerat dolorem officiis? Veritatis tempora labore laborum odio.
-    Accusamus sint illum blanditiis. Voluptatum similique cumque explicabo quasi possimus reprehenderit assumenda doloremque ex. Esse atque quibusdam quo explicabo quod repellat vero, asperiores ab doloribus facilis rem blanditiis, doloremque odit!
-    Optio, ullam voluptatem? Vero, eveniet temporibus voluptates qui cum cumque architecto, culpa alias sunt debitis possimus facilis ex nihil libero totam aspernatur ipsum, vitae eos sequi atque doloribus dolorem fugit.
-    Expedita eveniet laudantium explicabo ratione id suscipit necessitatibus aut nihil in ea eligendi, dicta unde recusandae enim illum laboriosam cumque ullam est, nulla dolor quibusdam earum, neque odio? Aliquam, pariatur.
-    Distinctio laborum voluptas molestias voluptatibus saepe blanditiis dignissimos nisi totam, aliquid fugiat repudiandae unde, quasi, optio soluta iusto id delectus. Quibusdam fugiat, eaque tenetur omnis eligendi quia officiis minima laboriosam!
-    Totam recusandae ea nisi omnis neque commodi officia libero aperiam praesentium. Exercitationem delectus maiores facilis ipsa. Dolor nulla distinctio blanditiis doloribus maxime ullam sit? Quod reiciendis doloremque commodi nisi repellendus.
-    Sunt sint dolore eveniet sit maxime quibusdam accusamus, libero cupiditate fuga temporibus quia odio, rem possimus ex corrupti architecto, dolores quis et eos iure explicabo. Vitae consequatur laudantium perferendis quisquam!
-    Consectetur possimus, voluptates delectus consequatur dolore natus ratione sequi. Voluptatibus tempore quod architecto eligendi, atque sapiente pariatur, hic cum odit eius est maiores aliquid eos, sunt porro suscipit vero dolorum.
-    Tempore saepe rerum veniam eius nihil dolore nesciunt enim delectus soluta, libero facere voluptas perferendis totam ipsam laboriosam optio, omnis labore reiciendis vitae repellat distinctio, sequi sunt maiores beatae? Accusamus.
-    Aliquid corrupti enim sequi, adipisci consequuntur dolores unde dolorem vel iusto fugit pariatur vero facere in blanditiis cumque incidunt. Possimus voluptas harum voluptatem ipsum debitis natus eum, quidem voluptate voluptates!
-    Dolores, labore. Voluptatum exercitationem minus numquam odit perferendis non maxime illum error eum, voluptates veritatis, incidunt doloremque? Est molestiae eos temporibus ad autem nam quod at alias nostrum, voluptate quos?
-    Minus voluptatem eos hic, est maiores placeat nulla quis omnis magnam debitis quae nihil sed ratione quidem nisi tenetur consequuntur deserunt, neque perferendis, illum sit natus autem doloremque quia. Recusandae!
-    Vero, exercitationem officiis maxime incidunt eligendi cumque placeat odio laboriosam quis repudiandae veniam maiores saepe dolor eum recusandae, illum necessitatibus, minus accusamus. Eaque dicta quas voluptatum consectetur consequuntur ipsum repudiandae.
-    Deserunt fuga architecto ullam, culpa numquam voluptate, nisi, atque suscipit laboriosam autem porro ut esse! Aperiam nam quam a quibusdam architecto sapiente sed quae odio vel perspiciatis quos, suscipit dolores!
-    Odit fuga minima ratione iure, unde quas iusto velit, ad illo consectetur magnam laboriosam labore. Dolorum eius consectetur repudiandae? Vero nesciunt quibusdam quos pariatur corporis velit rerum voluptates vitae necessitatibus!
-    Nobis voluptate dolorem eius reiciendis! Laudantium quos ipsum incidunt sint veniam, neque alias at architecto officia ab quia praesentium. Quam quos ratione eaque vel doloribus impedit voluptates ullam tempore minima.
-    Atque commodi nam explicabo distinctio? Adipisci tempora rem unde nam laudantium aut atque necessitatibus sit! Eligendi eaque voluptate ab aliquid, consequatur vel aspernatur amet iure facilis, beatae laborum obcaecati numquam.
-    Alias delectus deserunt ut consequuntur nemo ducimus a magnam nihil fuga sunt repellat eos unde accusantium aut, perferendis consequatur similique non voluptates et, cumque dolore perspiciatis, in tenetur. Aperiam, neque?
-    Aspernatur minus eligendi amet animi magni. Cum, quam dolorum voluptas aspernatur similique ea! Aut quis id unde, amet ea cupiditate enim quasi voluptatem eaque nemo ipsam soluta odio provident ipsum?
-    Soluta accusamus eos quia error, mollitia consectetur velit adipisci? Labore ipsa quaerat provident natus dolor alias repudiandae ab molestiae saepe culpa delectus earum sapiente optio, maxime, odio modi quia officia?
-    Exercitationem accusamus et ab. Voluptates fugit neque tenetur ad, eaque provident eius ipsam impedit quidem? Reiciendis dolorum voluptatibus doloribus consectetur quod numquam suscipit consequatur eligendi molestias sunt eos, deserunt culpa!
-    At id saepe totam blanditiis nemo quae illum cupiditate. Commodi, nam repellendus! Nisi praesentium nemo provident eum, recusandae nulla, atque incidunt tenetur, animi aspernatur sunt rem. Quia odio fuga aperiam!
-    Quaerat animi vel autem minima quidem sapiente sed, necessitatibus ab molestias! Nisi in, quasi cumque rem ipsum sequi doloremque quaerat mollitia magni consequuntur expedita maiores nesciunt animi, provident facilis quae?
-    Voluptate cupiditate sit optio illo, unde quos reprehenderit ea. Praesentium hic dolorem est, ipsam similique ea placeat officia provident possimus recusandae non, reiciendis itaque quam nulla nemo atque perspiciatis voluptatum.
-    Esse quae excepturi mollitia itaque velit maxime quam non odio perferendis ipsa quod ullam facere atque reprehenderit at quaerat eaque voluptatem suscipit natus commodi voluptate, sit sunt unde laudantium? Ducimus.
-    Molestiae temporibus sequi ullam reprehenderit totam sunt facere corporis iure eos autem iste blanditiis officiis quis hic, suscipit dolorem fuga distinctio inventore eum perspiciatis. Laboriosam consequuntur eligendi eveniet aperiam aliquid!
-    Ullam minima dolores, totam eum voluptate molestias recusandae molestiae sapiente quisquam beatae nulla architecto alias voluptas in fugit inventore vero qui fugiat quibusdam quam soluta placeat commodi. Dolore, itaque enim.
-    Illo ullam aliquam dolores quos at natus voluptatibus optio tempora voluptates maxime expedita dignissimos vel nobis blanditiis unde, harum, rem exercitationem architecto. Labore voluptatibus quo odio quia quod ipsum mollitia.
-    Accusamus quibusdam delectus quod suscipit adipisci illum sed. Earum incidunt dolores expedita, voluptatem maiores quo, non aperiam deleniti possimus doloremque laboriosam est quisquam explicabo placeat, voluptates rerum eum autem praesentium!
-    Quisquam provident deserunt praesentium fugit quia asperiores veritatis deleniti sit nam soluta voluptate, quis explicabo voluptatem. Incidunt at voluptatum officia esse voluptas eaque aut iste amet! Reprehenderit eveniet itaque nam?
-    Minus error non vitae nisi est quae asperiores provident at reiciendis! Eos molestiae rem, ipsa aliquid dolor repellat quam optio in expedita quae cumque soluta tempora amet nemo veritatis rerum.
-    Deserunt maxime provident officia quia? Officia provident et nulla voluptas, eveniet distinctio laudantium sunt reprehenderit nisi aut accusamus a aspernatur vitae dicta, quibusdam minima inventore consequatur exercitationem deserunt perferendis sequi!
-    Doloremque molestias praesentium aut quos enim debitis laborum dolor vero, quia at cumque perspiciatis eius quam. Itaque architecto aliquam, tempore sapiente quaerat non provident, ipsam doloribus consequuntur dolor asperiores nobis.
-    Voluptatem atque saepe dolorum quam dicta ab sapiente neque impedit assumenda a placeat repellat sunt non officiis veniam, suscipit consequuntur nostrum! Odit reprehenderit labore debitis nulla asperiores suscipit quia accusantium.
-    Quisquam facere, a commodi, vel officia voluptatum sunt libero quibusdam ut quod deserunt minima atque quasi cupiditate doloremque perferendis repellendus eaque molestiae aliquam repellat veritatis autem id asperiores nesciunt? Odio?
-    Aut amet delectus, libero quo exercitationem aspernatur sint recusandae fugiat dolore nobis eos possimus, fuga est voluptates repellat fugit obcaecati vel ullam numquam ex, expedita harum impedit! Itaque, laudantium molestiae!
-    Odio quia suscipit laborum quibusdam dolor ipsa aspernatur modi nobis! Esse nesciunt harum veritatis laborum nulla, fuga sapiente quam vel eligendi tenetur, perspiciatis quibusdam cum voluptatum sunt hic molestiae repudiandae!
-    Voluptatum repellendus repudiandae, odio quo quibusdam saepe aspernatur impedit fugit. Ipsam, voluptas dolorem magnam fugit optio ducimus nisi atque, explicabo suscipit enim unde inventore sunt voluptatum fuga soluta officia quam?
-    Suscipit porro dolor esse fugit itaque hic, odio est repellendus nobis id omnis asperiores laudantium iste natus cupiditate ut earum ex obcaecati! Natus eos aliquam iste? Doloremque, illum. Magni, esse?
-    Optio, voluptate dolor cum qui officiis, molestias ad minus magnam repellendus tempora vero maxime repellat in ullam. Ipsam rerum, odio neque est, modi ducimus architecto perspiciatis amet natus maiores alias!</p>
+  <div class="">
+
+    <PriInputText v-model="searchQuery" type="text" placeholder="Search users..." class="" />
+
+    <div class="p-4">
+      <PriButton label="Add New User" icon="pi pi-user-plus" @click="visible = true" rounded raised />
+      <PriDialog v-model:visible="visible" modal :draggable="false" dismissableMask class="mx-3 sm:mx-0 w-full max-w-lg"
+        :pt="{
+          root: { class: 'rounded-[2rem] border-none shadow-2xl overflow-hidden' },
+          header: { class: 'hidden' } // We use our own header
+        }">
+        <div class="user-form p-2">
+          <div class="flex justify-end -mb-4 p-2">
+            <PriButton icon="pi pi-times" severity="secondary" variant="text" rounded @click="visible = false" />
+          </div>
+
+          <div class="flex flex-col items-center text-center my-5">
+            <div class="relative flex items-center justify-center w-16 h-16 mb-3">
+              <div
+                class="absolute inset-0 border-2 border-primary-100 dark:border-primary-900/50 rounded-[1.25rem] animate-custom-pulse">
+              </div>
+
+              <div
+                class="relative flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 shadow-lg shadow-primary-500/30">
+                <ShieldCheck :size="28" class="text-indigo-500" />
+              </div>
+            </div>
+
+            <h2 class="text-2xl font-black text-surface-900 dark:text-surface-0 tracking-tight">
+              Create New User
+            </h2>
+            <p class="text-sm text-surface-500 dark:text-surface-400 mt-1">
+              Fill in the details to register a new member.
+            </p>
+          </div>
+
+          <Form v-slot="$form" :initialValues="initialValues" :resolver="resolver" @submit="onFormSubmit"
+            :validateOnValueUpdate="true" :validateOnBlur="true" class="flex flex-col gap-3">
+            <div class="flex flex-col gap-1">
+              <PriInputGroup class="custom-input-group">
+                <PriInputGroupAddon>
+                  <User :size="18" />
+                </PriInputGroupAddon>
+                <PriInputText name="fullName" placeholder="Full name*" fluid class="" />
+              </PriInputGroup>
+              <transition name="slide-up">
+                <PriMessage v-if="$form.fullName?.invalid" severity="error" size="small" variant="simple">
+                  {{ $form.fullName.error.message }}
+                </PriMessage>
+              </transition>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <PriInputGroup class="custom-input-group">
+                <PriInputGroupAddon>
+                  <Mail :size="18" />
+                </PriInputGroupAddon>
+                <PriInputText name="email" placeholder="Email Address*" fluid />
+              </PriInputGroup>
+              <transition name="slide-up">
+                <PriMessage v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
+                  {{ $form.email.error.message }}
+                </PriMessage>
+              </transition>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <PriInputGroup class="custom-input-group">
+                <PriInputGroupAddon>
+                  <img src="https://flagcdn.com/w40/kh.png" width="18" alt="KH" class="rounded-sm" />
+                </PriInputGroupAddon>
+                <PriInputMask name="phoneNumber" mask="999 999 999?9" placeholder="012 345 678" fluid />
+              </PriInputGroup>
+              <transition name="slide-up">
+                <PriMessage v-if="$form.phoneNumber?.invalid" severity="error" size="small" variant="simple">
+                  {{ $form.phoneNumber.error.message }}
+                </PriMessage>
+              </transition>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-4">
+              <div class="flex flex-col gap-1 flex-1">
+                <PriSelect name="role" :options="roles" placeholder="Select Role*" fluid class="rounded-xl" />
+                <transition name="slide-up">
+                  <PriMessage v-if="$form.role?.invalid" severity="error" size="small" variant="simple">
+                    {{ $form.role.error.message }}
+                  </PriMessage>
+                </transition>
+              </div>
+
+              <div class="flex flex-col gap-1 flex-1">
+                <PriSelect name="status" :options="statuses" placeholder="Status" fluid class="rounded-xl" />
+              </div>
+            </div>
+
+            <PriButton type="submit" label="Create Account" :loading="isSubmitting"
+              :disabled="!$form.valid || isSubmitting" class="" />
+          </Form>
+        </div>
+      </PriDialog>
+    </div>
+
+    <div class="view-user">
+      <div v-if="filteredUsers.length > 0" class="flex justify-center align-center grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <transition-group name="list">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 bg-surface-50/50">
+            <div v-for="user in filteredUsers" :key="user.email"
+              class=" user-card shadow-md relative bg-white dark:bg-surface-900 p-5 rounded-[1.75rem] transition-all duration-300 hover:translate-y-[-4px]">
+              <div class="flex justify-between items-start">
+                <div
+                  class="flex items-center gap-2 px-3 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-full">
+                  <Shield :size="14" />
+                  <span class="text-xs font-bold uppercase tracking-wider">{{ user.role }}</span>
+                </div>
+                <PriButton icon="pi pi-ellipsis-v" variant="text" severity="secondary" rounded size="small" />
+              </div>
+
+              <div class="flex flex-col items-center text-center ">
+                <div class="relative mb-3">
+                  <img :src="user.avatar" class="w-20 h-20 rounded-2xl object-cover shadow-md" alt="Avatar" />
+                  <div
+                    class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-white dark:border-surface-900"
+                    :class="{
+                      'bg-green-500': user.status === 'Active',
+                      'bg-yellow-500': user.status === 'On Break',
+                      'bg-red-500': user.status === 'Inactive'
+                    }"></div>
+                </div>
+                <h3 class="text-lg font-bold text-surface-900 dark:text-surface-0">{{ user.fullName }}</h3>
+                <PriTag :value="user.status" :severity="getStatusSeverity(user.status)" rounded
+                  class="mt-2 text-[10px]" />
+              </div>
+
+              <div class="space-y-3 bg-surface-50 dark:bg-surface-800/50 p-4 rounded-2xl">
+                <div class="flex items-center gap-3 text-sm text-surface-600 dark:text-surface-400">
+                  <Mail :size="16" class="text-primary-500" />
+                  <span class="truncate">{{ user.email }}</span>
+                </div>
+                <div class="flex items-center gap-3 text-sm text-surface-600 dark:text-surface-400">
+                  <Phone :size="16" class="text-primary-500" />
+                  <span>{{ user.phoneNumber }}</span>
+                </div>
+              </div>
+
+              <div class="flex gap-2 mt-4">
+                <PriButton label="Edit" icon="pi pi-pencil" fluid outlined rounded size="small" class="flex-1" />
+                <PriButton icon="pi pi-trash" severity="danger" outlined rounded size="small" />
+              </div>
+            </div>
+          </div>
+
+        </transition-group>
+      </div>
+      <div v-else class="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
+        <div
+          class="w-20 h-20 bg-surface-100 dark:bg-surface-800 rounded-3xl flex items-center justify-center mb-4 text-surface-400">
+          <Search :size="40" />
+        </div>
+        <h3 class="text-xl font-bold text-surface-900 dark:text-surface-0">No results found</h3>
+        <p class="text-surface-500">We couldn't find any users matching "{{ searchQuery }}"</p>
+        <PriButton label="Clear Search" variant="text" @click="searchQuery = ''" class="mt-4" />
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+/* 1. Animation for the Icon Ring */
+@keyframes custom-pulse {
 
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.15);
+    opacity: 0.3;
+  }
+}
+
+.animate-custom-pulse {
+  animation: custom-pulse 3s ease-in-out infinite;
+}
+
+/* 2. Transition for Messages */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.2s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
 </style>
+<style scoped></style>
