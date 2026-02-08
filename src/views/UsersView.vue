@@ -1,27 +1,65 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, inject } from "vue";
 import { Form } from "@primevue/forms";
 import { zodResolver } from "@primevue/forms/resolvers/zod";
 import { z } from "zod";
 import {
   User,
   Mail,
-  ShieldUser,
   ShieldCheck,
-  Phone, Shield
+  Phone, Shield,
 } from 'lucide-vue-next';
+import { useAuthStore } from "@/stores/auth";
+const objRole = {
+  Admin: "ADMIN",
+  Barista: "BARISTA",
+  Cashier: "CASHIER",
+  StockControl: "STOCK_CONTROL",
+  Accountant: "ACCOUNTANT",
+  Supplier: "SUPPLIER",
+  Manager: "MANAGER",
+}
+const objUserStatus = {
+  Active: "ACTIVE",
+  Pending: "PENDING",
+  Inactive: "INACTIVE",
+}
+const objGender = {
+  Male: "MALE",
+  Female: "FEMALE",
+}
+const roles = ref(Object.keys(objRole));
+const statuses = ref(Object.keys(objUserStatus));
+const visible = ref(false);
 const isSubmitting = ref(false);
+const authStore = useAuthStore();
+const userInfo = authStore.getUserSessionStorage();
+const tenantId = userInfo?.TenantId;
+const emailLogin = userInfo?.Email;
 
-
-
+const $api = inject('$api');
+const searchQuery = ref(""); // New Search Ref
 // Ensure role starts as an empty string or undefined so Zod treats it as missing, not "wrong type"
 const initialValues = ref({
   fullName: "",
   email: "",
   role: "",
-  status: "Active",
-  phoneNumber: ""
+  status: Object.keys(objUserStatus)[0],
+  phoneNumber: "",
+  gender: objGender.Male,
 });
+
+// Example data based on your initialValues structure
+const users = ref([
+  // {
+  //   fullName: "Alex Rivera",
+  //   email: "alex@cafe.com",
+  //   role: "Admin",
+  //   status: "Active",
+  //   phoneNumber: "012 345 678",
+  //   avatar: "https://i.pravatar.cc/150?u=1"
+  // },
+]);
 
 const resolver = zodResolver(
   z.object({
@@ -29,67 +67,22 @@ const resolver = zodResolver(
     email: z.string().min(1, "Email is required").email("Invalid email address."),
     role: z.string().min(1, "Please select a user role."),
     status: z.string().min(1, "Status is required"),
+    gender: z.string().min(1, "Gender is required"),
     phoneNumber: z.string()
       .min(1, "Phone number is required.")
-      .refine((val) => {
-        const cleaned = val.replace(/\s/g, "");
-        return /^0\d{8,9}$/.test(cleaned);
-      }, "Must start with 0 and be a valid Cambodian number.")
+      // .refine((val) => {
+      //   const cleaned = val.replace(/\s/g, "");
+      //   return /^0\d{8,9}$/.test(cleaned);
+      // }, "Must start with 0 and be a valid Cambodian number.")
   })
 );
 
-const onFormSubmit = async (e) => {
-  if (!e.valid) return;
-  isSubmitting.value = true;
-
-  try {
-    console.log("Validated Data:", e.values);
-    // API Call here
-  } finally {
-    isSubmitting.value = false;
-  }
+// Reverse the object keys and values
+const reverseObject = (obj) => {
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => [value, key])
+  );
 };
-
-const roles = ref(['Admin', 'Barista', 'Manager']);
-const statuses = ref(['Active', 'On Break', 'Inactive']);
-const visible = ref(false);
-const searchQuery = ref(""); // New Search Ref
-
-// Example data based on your initialValues structure
-const users = ref([
-  {
-    fullName: "Alex Rivera",
-    email: "alex@cafe.com",
-    role: "Admin",
-    status: "Active",
-    phoneNumber: "012 345 678",
-    avatar: "https://i.pravatar.cc/150?u=1"
-  },
-  {
-    fullName: "Alex Rivera",
-    email: "alex@cafe.com",
-    role: "Admin",
-    status: "Active",
-    phoneNumber: "012 345 678",
-    avatar: "https://i.pravatar.cc/150?u=1"
-  },
-  {
-    fullName: "Sarah Chen",
-    email: "sarah@cafe.com",
-    role: "Barista",
-    status: "On Break",
-    phoneNumber: "099 888 777",
-    avatar: "https://i.pravatar.cc/150?u=2"
-  },
-  {
-    fullName: "Mike Ross",
-    email: "mike@cafe.com",
-    role: "Manager",
-    status: "Inactive",
-    phoneNumber: "010 555 444",
-    avatar: "https://i.pravatar.cc/150?u=3"
-  }
-]);
 
 // Helper to style status badges
 const getStatusSeverity = (status) => {
@@ -118,16 +111,116 @@ const filteredUsers = computed(() => {
   });
 });
 
+const listUsers = async () => {
+  try {
+    const response = await $api.user.listUsers(tenantId);
+    // Exclude the current user
+    const exludedUser = response.data.filter(user => user.Email !== emailLogin);
+    // Retstrunct the user list
+    users.value = exludedUser.map(user => {
+      return {
+        id: user.EntityItemId,
+        fullName: user.FullName,
+        email: user.Email,
+        role: reverseObject(objRole)[user.Role],
+        status: (reverseObject(objUserStatus)[user.Status]),
+        gender: user.Gender,
+        phoneNumber: `0${user.Phone.Number}`,
+        countryCode: user.Phone.CountryCode,
+        avatar: user.Avatar,
+      };
+    });
+    // console.log('Users', users.value);
+    // users.value = response.data;
+  } catch (error) {
+    console.error('Error List Users', error);
+  }
+};
+const resetDefault = () => {
+  initialValues.value = {
+    fullName: "",
+    email: "",
+    role: "",
+    status: Object.keys(objUserStatus)[0],
+    phoneNumber: "",
+    gender: objGender.Male,
+  };
+};
+const handleCreateUser = async () => {
+  visible.value = true;
+  resetDefault();
+};
+const handleDeleteUser = async (id) => {
+  try {
+    const response = await $api.user.deleteUser(id, tenantId);
+    // console.log('Response', response);
+    listUsers();
+  } catch (error) {
+    console.error('Error Delete User', error);
+  } finally {
+    visible.value = false;
+  }
+};
+const handleEditUser = (user) => {
+  visible.value = true;
+  initialValues.value = user;
+};
 
+const onFormSubmit = async (e) => {
+  if (!e.valid) return;
+  isSubmitting.value = true;
+
+  try {
+    const { values } = e;
+    // API Call here
+    const ph = values.phoneNumber.substring(1);
+    const final =  ph.replace(/\D/g, '');
+
+    const payload = {
+      TenantId: tenantId,
+      FullName: values.fullName,
+      Email: values.email,
+      Role: objRole[values.role],
+      Status: objUserStatus[values.status],
+      Phone: {
+        Number: final,
+        CountryCode: '+855'
+      },
+      Gender: values.gender,
+    };
+    // console.log("Validated Data:", payload, initialValues.value.id);
+    if (initialValues.value.id) {
+      await $api.user.updateUserById(payload, tenantId, initialValues.value.id);
+    } else {
+      await $api.user.createUser(payload, tenantId);
+    }
+  } finally {
+    visible.value = false;
+    isSubmitting.value = false;
+    resetDefault();
+    listUsers();
+  }
+};
+
+
+onMounted(() => {
+  listUsers();
+});
 </script>
 
 <template>
   <div class="">
 
-    <PriInputText v-model="searchQuery" type="text" placeholder="Search users..." class="" />
+    <PriInputGroup class="custom-input-group">
+      <PriInputGroupAddon>
+        <PriButton icon="pi pi-search" severity="secondary" variant="text" />
+      </PriInputGroupAddon>
+      <PriInputText v-model="searchQuery" type="text" placeholder="Search users..." class="" icon="pi pi-search" />
+    </PriInputGroup>
+
 
     <div class="p-4">
-      <PriButton label="Add New User" icon="pi pi-user-plus" @click="visible = true" rounded raised />
+      <PriButton label="Add New User" icon="pi pi-user-plus" @click="handleCreateUser" rounded raised />
       <PriDialog v-model:visible="visible" modal :draggable="false" dismissableMask class="mx-3 sm:mx-0 w-full max-w-lg"
         :pt="{
           root: { class: 'rounded-[2rem] border-none shadow-2xl overflow-hidden' },
@@ -151,7 +244,7 @@ const filteredUsers = computed(() => {
             </div>
 
             <h2 class="text-2xl font-black text-surface-900 dark:text-surface-0 tracking-tight">
-              Create New User
+              {{ initialValues.id ? 'Edit User' : 'Create New User' }}
             </h2>
             <p class="text-sm text-surface-500 dark:text-surface-400 mt-1">
               Fill in the details to register a new member.
@@ -165,7 +258,8 @@ const filteredUsers = computed(() => {
                 <PriInputGroupAddon>
                   <User :size="18" />
                 </PriInputGroupAddon>
-                <PriInputText name="fullName" placeholder="Full name*" fluid class="" />
+                <PriInputText name="fullName" placeholder="Full name*" fluid class=""
+                  v-model="initialValues.fullName" />
               </PriInputGroup>
               <transition name="slide-up">
                 <PriMessage v-if="$form.fullName?.invalid" severity="error" size="small" variant="simple">
@@ -179,7 +273,7 @@ const filteredUsers = computed(() => {
                 <PriInputGroupAddon>
                   <Mail :size="18" />
                 </PriInputGroupAddon>
-                <PriInputText name="email" placeholder="Email Address*" fluid />
+                <PriInputText name="email" placeholder="Email Address*" fluid v-model="initialValues.email" />
               </PriInputGroup>
               <transition name="slide-up">
                 <PriMessage v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
@@ -193,7 +287,8 @@ const filteredUsers = computed(() => {
                 <PriInputGroupAddon>
                   <img src="https://flagcdn.com/w40/kh.png" width="18" alt="KH" class="rounded-sm" />
                 </PriInputGroupAddon>
-                <PriInputMask name="phoneNumber" mask="999 999 999?9" placeholder="012 345 678" fluid />
+                <PriInputMask name="phoneNumber" mask="999 999 999?9" placeholder="012 345 678" fluid
+                  v-model="initialValues.phoneNumber" />
               </PriInputGroup>
               <transition name="slide-up">
                 <PriMessage v-if="$form.phoneNumber?.invalid" severity="error" size="small" variant="simple">
@@ -204,7 +299,8 @@ const filteredUsers = computed(() => {
 
             <div class="flex flex-col md:flex-row gap-4">
               <div class="flex flex-col gap-1 flex-1">
-                <PriSelect name="role" :options="roles" placeholder="Select Role*" fluid class="rounded-xl" />
+                <PriSelect name="role" :options="roles" placeholder="Select Role*" fluid class="rounded-xl"
+                  v-model="initialValues.role" />
                 <transition name="slide-up">
                   <PriMessage v-if="$form.role?.invalid" severity="error" size="small" variant="simple">
                     {{ $form.role.error.message }}
@@ -213,11 +309,23 @@ const filteredUsers = computed(() => {
               </div>
 
               <div class="flex flex-col gap-1 flex-1">
-                <PriSelect name="status" :options="statuses" placeholder="Status" fluid class="rounded-xl" />
+                <PriSelect name="status" :options="statuses" placeholder="Status" fluid class="rounded-xl"
+                  v-model="initialValues.status" />
               </div>
             </div>
 
-            <PriButton type="submit" label="Create Account" :loading="isSubmitting"
+            <div class="flex flex-wrap gap-4">
+              <div class="flex items-center gap-2">
+                <PriRadioButton v-model="initialValues.gender" inputId="ingredient1" name="gender" :value="objGender.Male" />
+                <label for="ingredient1">Male</label>
+              </div>
+              <div class="flex items-center gap-2">
+                <PriRadioButton v-model="initialValues.gender" inputId="ingredient2" name="gender" :value="objGender.Female" />
+                <label for="ingredient2">Female</label>
+              </div>
+            </div>
+
+            <PriButton type="submit" :label="initialValues.id ? 'Update User' : 'Create Account'" :loading="isSubmitting"
               :disabled="!$form.valid || isSubmitting" class="" />
           </Form>
         </div>
@@ -225,61 +333,56 @@ const filteredUsers = computed(() => {
     </div>
 
     <div class="view-user">
-      <div v-if="filteredUsers.length > 0" class="flex justify-center align-center grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div v-if="filteredUsers.length > 0"
+        class="flex justify-center align-center grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <transition-group name="list">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 bg-surface-50/50">
-            <div v-for="user in filteredUsers" :key="user.email"
-              class=" user-card shadow-md relative bg-white dark:bg-surface-900 p-5 rounded-[1.75rem] transition-all duration-300 hover:translate-y-[-4px]">
-              <div class="flex justify-between items-start">
+          <div v-for="user in filteredUsers" :key="user.email"
+            class=" user-card shadow-md relative bg-white dark:bg-surface-900 p-5 rounded-[1.75rem] transition-all duration-300 hover:translate-y-[-4px]">
+            <div class="flex justify-between items-start">
+              <div
+                class="flex items-center gap-2 px-3 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-full">
+                <Shield :size="14" />
+                <span class="text-xs font-bold uppercase tracking-wider">{{ user.role }}</span>
+              </div>
+              <PriButton icon="pi pi-ellipsis-v" variant="text" severity="secondary" rounded size="small" />
+            </div>
+
+            <div class="flex flex-col items-center text-center ">
+              <div class="relative mb-3">
+                <img :src="user.avatar || 'https://placehold.net/avatar-4.png'" class="w-20 h-20 rounded-2xl object-cover shadow-md" alt="Avatar" />
                 <div
-                  class="flex items-center gap-2 px-3 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-full">
-                  <Shield :size="14" />
-                  <span class="text-xs font-bold uppercase tracking-wider">{{ user.role }}</span>
-                </div>
-                <PriButton icon="pi pi-ellipsis-v" variant="text" severity="secondary" rounded size="small" />
+                  class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-white dark:border-surface-900"
+                  :class="{
+                    'bg-green-500': user.status === reverseObject(objUserStatus)[objUserStatus.Active],
+                    'bg-yellow-500': user.status === reverseObject(objUserStatus)[objUserStatus.Pending],
+                    'bg-red-500': user.status === reverseObject(objUserStatus)[objUserStatus.Inactive]
+                  }"></div>
               </div>
+              <h3 class="text-lg font-bold text-surface-900 dark:text-surface-0">{{ user.fullName }}</h3>
+              <PriTag :value="user.status" :severity="getStatusSeverity(user.status)" rounded
+                class="mt-2 text-[10px]" />
+            </div>
 
-              <div class="flex flex-col items-center text-center ">
-                <div class="relative mb-3">
-                  <img :src="user.avatar" class="w-20 h-20 rounded-2xl object-cover shadow-md" alt="Avatar" />
-                  <div
-                    class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-white dark:border-surface-900"
-                    :class="{
-                      'bg-green-500': user.status === 'Active',
-                      'bg-yellow-500': user.status === 'On Break',
-                      'bg-red-500': user.status === 'Inactive'
-                    }"></div>
-                </div>
-                <h3 class="text-lg font-bold text-surface-900 dark:text-surface-0">{{ user.fullName }}</h3>
-                <PriTag :value="user.status" :severity="getStatusSeverity(user.status)" rounded
-                  class="mt-2 text-[10px]" />
+            <div class="space-y-3 bg-surface-50 dark:bg-surface-800/50 p-4 rounded-2xl">
+              <div class="flex items-center gap-3 text-sm text-surface-600 dark:text-surface-400">
+                <Mail :size="16" class="text-primary-500" />
+                <span class="truncate">{{ user.email }}</span>
               </div>
+              <div class="flex items-center gap-3 text-sm text-surface-600 dark:text-surface-400">
+                <Phone :size="16" class="text-primary-500" />
+                <span>{{ user.phoneNumber }}</span>
+              </div>
+            </div>
 
-              <div class="space-y-3 bg-surface-50 dark:bg-surface-800/50 p-4 rounded-2xl">
-                <div class="flex items-center gap-3 text-sm text-surface-600 dark:text-surface-400">
-                  <Mail :size="16" class="text-primary-500" />
-                  <span class="truncate">{{ user.email }}</span>
-                </div>
-                <div class="flex items-center gap-3 text-sm text-surface-600 dark:text-surface-400">
-                  <Phone :size="16" class="text-primary-500" />
-                  <span>{{ user.phoneNumber }}</span>
-                </div>
-              </div>
-
-              <div class="flex gap-2 mt-4">
-                <PriButton label="Edit" icon="pi pi-pencil" fluid outlined rounded size="small" class="flex-1" />
-                <PriButton icon="pi pi-trash" severity="danger" outlined rounded size="small" />
-              </div>
+            <div class="flex gap-2 mt-4">
+              <PriButton @click="handleEditUser(user)" label="Edit" icon="pi pi-pencil" fluid outlined rounded size="small" class="flex-1" />
+              <PriButton :disabled="true" @click="handleDeleteUser(user.id)" icon="pi pi-trash" severity="danger" outlined rounded size="small" />
             </div>
           </div>
 
         </transition-group>
       </div>
       <div v-else class="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-        <div
-          class="w-20 h-20 bg-surface-100 dark:bg-surface-800 rounded-3xl flex items-center justify-center mb-4 text-surface-400">
-          <Search :size="40" />
-        </div>
         <h3 class="text-xl font-bold text-surface-900 dark:text-surface-0">No results found</h3>
         <p class="text-surface-500">We couldn't find any users matching "{{ searchQuery }}"</p>
         <PriButton label="Clear Search" variant="text" @click="searchQuery = ''" class="mt-4" />

@@ -67,6 +67,10 @@ export const useAuthStore = defineStore('auth', () => {
     sessionStorage.setItem(USER_KEY, JSON.stringify(user.value));
   }
 
+  function getUserSessionStorage() {
+    const data = sessionStorage.getItem(USER_KEY);
+    return data ? JSON.parse(data) : null;
+  }
   return { 
     token, 
     user, 
@@ -74,6 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
     userName,
     login, 
     logout,
-    updateUser 
+    updateUser,
+    getUserSessionStorage
   };
 });
