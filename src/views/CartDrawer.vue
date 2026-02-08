@@ -77,7 +77,7 @@ const totalItemsCount = computed(() => {
 });
 
 const pluralize = (count, word) => {
-    if (count === 1) return word;
+    if (count <= 1) return word;
 
     // Check if word ends in 'y' (and is preceded by a consonant)
     // Example: 'Category' -> 'Categories', 'Quantity' -> 'Quantities'
@@ -250,7 +250,7 @@ const checkout = async (items) => {
                     </div>
                 </div>
                 <PriButton @click="checkout(items)" :disabled="items.length === 0" class="w-full p-3">
-                    <span>Complete Order</span>
+                    <span>To Preparation</span>
                 </PriButton>
             </div>
         </div>

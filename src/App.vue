@@ -76,7 +76,7 @@ const isCollapsedSidebar = ref(true);
 
 <template>
   <div class="min-h-screen bg-slate-50 font-sans text-slate-900">
-    <PriToast position="top-center" />
+    <PriToast position="top-center" class="w-full p-2" />
     
     <MainCafe>
       <template #header>
@@ -92,7 +92,7 @@ const isCollapsedSidebar = ref(true);
             class="flex-1 overflow-auto transition-all duration-300"
             :class="[isLoggedIn ? (isCollapsedSidebar ? 'ml-24' : 'ml-80') : 'ml-0']"
           >
-            <div class="max-w-7xl mx-auto p-4">
+            <div class="max-w-7xl mx-auto">
               <router-view v-slot="{ Component }">
                 <transition name="fade" mode="out-in">
                   <component :is="Component" />

@@ -74,12 +74,13 @@ const getTooltip = (label) => isCollapsed.value ? { value: label, showDelay: 200
       class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 transition-all"></div>
   </Transition>
 
-  <aside class="z-40 m-2 rounded-xl bg-slate-900 transition-all duration-300 shadow-xl" :class="[
+  <aside class="z-40 my-2 radius bg-slate-900 transition-all duration-300 shadow-xl"
+   :class="[
     isCollapsed
       ? 'relative w-20'
-      : 'fixed w-72 h-[calc(96vh-100px)]'
+      : 'fixed w-72 h-[calc(95vh-100px)] top-15 left-0'
   ]">
-    <div class="h-20 flex items-center px-4 border-b border-slate-700/50 overflow-hidden whitespace-nowrap">
+    <div class="h-20 flex items-center px-3 border-b border-slate-700/50 overflow-hidden whitespace-nowrap">
       <div class="flex items-center gap-3 min-w-max cursor-pointer" @click="router.push('/home'); isCollapsed = true;">
         <div
           class="w-10 h-10 bg-indigo-500 p-2 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
@@ -130,6 +131,9 @@ const getTooltip = (label) => isCollapsed.value ? { value: label, showDelay: 200
 
 <style scoped>
 
+.radius {
+  border-radius: 0 1rem 1rem 0;
+}
 /* Fade effect for backdrop */
 .fade-enter-active,
 .fade-leave-active {

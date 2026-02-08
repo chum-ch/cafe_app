@@ -160,7 +160,7 @@ const removeItem = (id) => {
 
 
     <PriButton @click="isCartOpen = true"
-      class=" text-white fixed bottom-[11rem] right-5 p-2 shadow-lg shadow-purple-200/50 hover:shadow-purple-200/100 active:scale-95 transition-all duration-300">
+      class=" text-white fixed bottom-[12rem] right-4 p-2 shadow-lg shadow-purple-200/50 hover:shadow-purple-200/100 active:scale-95 transition-all duration-300">
       <ShoppingCart class="" />
       <span class="font-bold ">{{ cartItems.length }}</span>
     </PriButton>
