@@ -1,214 +1,167 @@
 <script setup>
 import { ref, getCurrentInstance } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-// Icons from Lucide (clean, modern icons)
-import { 
-  Users, 
-  Box, 
-  Settings, 
+import {
   ChevronRight,
-  CircleArrowRight,
-  CircleArrowLeft,
-  ChevronsLeft, 
+  ChevronsLeft,
   ChevronsRight,
-  Coffee, 
-  LayoutDashboard,
-  Circle,
+  Circle
 } from 'lucide-vue-next';
 import IconCafe from './icons/IconCafe.vue';
 import IconSettings from './icons/IconSettings.vue';
 import IconUsers from './icons/IconUsers.vue';
 import IconBox from './icons/IconBox.vue';
 
-// State
-const isCollapsed = ref(true); // Sidebar state
-const expandedMenus = ref({});  // Track which sub-menus are open
+const isCollapsed = ref(true);
+const expandedMenus = ref({});
 
 const route = useRoute();
 const router = useRouter();
 const { emit } = getCurrentInstance();
 defineEmits(['routeChange']);
-// Menu Data Structure
+
 const menuItems = [
-  {
-    label: 'Users',
-    icon: IconUsers,
-    route: '/users',
-    key: 'users'
-  },
+  { label: 'Users', icon: IconUsers, route: '/users', key: 'users' },
   {
     label: 'Inventory',
     icon: IconBox,
     key: 'inventory',
-    // Sub-menus
     children: [
       { label: 'All Products', route: '/inventory/all' },
       { label: 'Stock In', route: '/inventory/in' },
       { label: 'Stock Out', route: '/inventory/out' },
     ]
   },
-  {
-    label: 'Settings',
-    icon: IconSettings,
-    route: '/settings',
-    key: 'settings'
-  }
+  { label: 'Settings', icon: IconSettings, route: '/settings', key: 'settings' }
 ];
 
-// Actions
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value;
-  // If collapsing, close all submenus for a cleaner look
-  if (isCollapsed.value) {
+  if (isCollapsed.value) expandedMenus.value = {};
+};
+
+const handleMenuClick = (item) => {
+  emit('routeChange', item);
+
+  if (item.children) {
+    // If it's a dropdown, we MUST expand sidebar to see the children
+    if (isCollapsed.value) {
+      isCollapsed.value = false;
+      setTimeout(() => { expandedMenus.value[item.key] = true; }, 150);
+    } else {
+      expandedMenus.value[item.key] = !expandedMenus.value[item.key];
+    }
+  } else {
+    // Standard navigation: Navigate and then AUTO-COLLAPSE
+    router.push(item.route);
+    isCollapsed.value = true; // <--- This keeps it tidy
     expandedMenus.value = {};
   }
 };
 
-const handleMenuClick = (item) => {
-    emit('routeChange', item);
-    // console.log('dfdf', item);
-    
-  // If item has children (Sub-menu)
-  if (item.children) {
-    // If sidebar is collapsed, expand it first so user can see sub-menu
-    if (isCollapsed.value) {
-      isCollapsed.value = false;
-      setTimeout(() => {
-        expandedMenus.value[item.key] = true;
-      }, 150); // slight delay for smooth transition
-    } else {
-      // Toggle the submenu
-      expandedMenus.value[item.key] = !expandedMenus.value[item.key];
-    }
-  } else {
-    // Standard navigation
-    router.push(item.route);
-  }
-
-};
-
-// Check if a route is active (including sub-routes)
 const isActive = (item) => {
   if (item.route) return route.path === item.route;
-  if (item.children) {
-    return item.children.some(child => child.route === route.path);
-  }
+  if (item.children) return item.children.some(child => child.route === route.path);
   return false;
 };
 
-// Tooltip Logic: Only show tooltip if sidebar is collapsed
-const getTooltip = (label) => {
-  return isCollapsed.value ? { value: label, showDelay: 200 } : null;
-};
+const getTooltip = (label) => isCollapsed.value ? { value: label, showDelay: 200 } : null;
 </script>
 
 <template>
-  <aside 
-    class="h-sreen bg-slate-900 text-slate-300 flex flex-col transition-all duration-300 ease-in-out shadow-xl relative"
-    :class="[isCollapsed ? 'w-20' : 'w-72']"
-  >
-    
+  <Transition name="fade">
+    <div v-if="!isCollapsed" @click="isCollapsed = true"
+      class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 transition-all"></div>
+  </Transition>
+
+  <aside class="z-40 m-2 rounded-xl bg-slate-900 transition-all duration-300 shadow-xl" :class="[
+    isCollapsed
+      ? 'relative w-20'
+      : 'fixed w-72 h-[calc(96vh-100px)]'
+  ]">
     <div class="h-20 flex items-center px-4 border-b border-slate-700/50 overflow-hidden whitespace-nowrap">
-      <div class="flex items-center gap-3 min-w-max cursor-pointer" @click="router.push('/home')">
-        <div class="w-10 h-10 bg-indigo-500 p-2 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-        <IconCafe :size="24" :color="'#fff'"/>
+      <div class="flex items-center gap-3 min-w-max cursor-pointer" @click="router.push('/home'); isCollapsed = true;">
+        <div
+          class="w-10 h-10 bg-indigo-500 p-2 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+          <IconCafe :size="24" :color="'#fff'" />
         </div>
-        
-        <div 
-          class="transition-opacity duration-300 flex flex-col"
-          :class="[isCollapsed ? 'opacity-0 w-0' : 'opacity-100']"
-        >
-          <span class="font-bold text-lg text-white tracking-wide">Cafe App</span>
+        <div class="transition-all duration-300 flex flex-col"
+          :class="[isCollapsed ? 'opacity-0 -translate-x-10' : 'opacity-100 translate-x-0']">
+          <span class="font-bold text-lg text-white">Cafe App</span>
           <span class="text-xs text-slate-400">Admin Console</span>
         </div>
       </div>
     </div>
 
-    <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-2 overflow-x-hidden">
-      
-      <div v-for="item in menuItems" :key="item.key">
-        
-        <div 
-          @click="handleMenuClick(item)"
-          v-tooltip.right="getTooltip(item.label)"
-          class="group flex items-center gap-3 px-3 py-3 rounded-lg cursor-pointer transition-all duration-200 min-w-max relative"
-          :class="[
-            isActive(item) 
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-900/20' 
-              : 'hover:bg-slate-800 hover:text-white'
-          ]"
-        >
-          <component :is="item.icon" :size="20" class="shrink-0" />
-
-          <div 
-            class="flex flex-1 items-center justify-between transition-all duration-300 overflow-hidden"
-            :class="[isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100']"
-          >
-            <span class="font-medium text-sm">{{ item.label }}</span>
-            
-            <ChevronRight 
-              v-if="item.children" 
-              :size="16" 
-              class="transition-transform duration-300"
-              :class="{ 'rotate-45': expandedMenus[item.key] }"
-            />
+    <nav class="flex-1 overflow-y-auto px-3 space-y-2">
+      <div v-for="item in menuItems" :key="item.key" class="">
+        <div @click="handleMenuClick(item)" v-tooltip.right="getTooltip(item.label)"
+          class="group mt-2 flex justify-center items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200"
+          :class="[isActive(item) ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/40' : 'hover:bg-slate-800 hover:text-white']">
+          <component :is="item.icon" :size="20" class="shrink-0 ml-3" />
+          <div class="flex flex-1 items-center justify-between overflow-hidden transition-opacity duration-300"
+            :class="[isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto']">
+            <span class="font-medium text-sm whitespace-nowrap">{{ item.label }}</span>
+            <ChevronRight v-if="item.children" :size="14" class="transition-transform"
+              :class="{ 'rotate-90': expandedMenus[item.key] }" />
           </div>
         </div>
 
-        <div 
-          v-if="item.children"
-          class="overflow-hidden transition-all duration-300 ease-in-out bg-slate-800/30 rounded-lg mt-1"
-          :class="[
-            !isCollapsed && expandedMenus[item.key] ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
-          ]"
-        >
-          <ul class="ml-4 py-2 space-y-1">
-            <li v-for="child in item.children" :key="child.label">
-              <router-link 
-                :to="child.route"
-                class="flex items-center gap-3 pl-11 pr-4 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors block relative"
-                active-class="!text-indigo-400 font-semibold"
-              >
-                 <Circle :size="8" class="shrink-0" :class="[route.path === child.route ? 'fill-indigo-400' : 'fill-transparent']" />
-                 <span>{{ child.label }}</span>
-              </router-link>
-            </li>
-          </ul>
-        </div>
-
+        <transition name="expand">
+          <div v-if="item.children && !isCollapsed && expandedMenus[item.key]"
+            class="mt-1 ml-4 space-y-1 border-l border-slate-700/50 pl-4">
+            <router-link v-for="child in item.children" :key="child.label" :to="child.route" @click="isCollapsed = true"
+              class="flex items-center gap-3 py-2 text-sm text-slate-400 hover:text-white transition-colors"
+              active-class="text-indigo-400 font-bold">
+              <Circle :size="6" :class="[route.path === child.route ? 'fill-indigo-400' : 'fill-transparent']" />
+              {{ child.label }}
+            </router-link>
+          </div>
+        </transition>
       </div>
     </nav>
 
-    <div class="absolute right-0 mt-7">
-      <button 
-        @click="toggleSidebar"
-        title="Toggle Sidebar"
-        class="w-full flex items-center text-primary justify-center  transition-colors bg-white p-1 shadow-lg"
-      >
-        <component 
-          :is="isCollapsed ? ChevronsRight : ChevronsLeft" 
-          :size="20" 
-        />
-      </button>
-    </div>
-
+    <button @click="toggleSidebar"
+      class="absolute -right-3 top-15 p-2 bg-indigo-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-indigo-400 transition-all z-50">
+      <component :is="isCollapsed ? ChevronsRight : ChevronsLeft" :size="14" />
+    </button>
   </aside>
 </template>
 
 <style scoped>
-/* Scrollbar styling for a cleaner look */
+
+/* Fade effect for backdrop */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Submenu expand animation */
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.3s ease;
+  max-height: 200px;
+  overflow: hidden;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-5px);
+}
+
 nav::-webkit-scrollbar {
   width: 4px;
 }
-nav::-webkit-scrollbar-track {
-  background: transparent;
-}
+
 nav::-webkit-scrollbar-thumb {
-  background-color: #334155;
-  border-radius: 20px;
-}
-button { 
-  border-radius: 5px 0px 0px 5px;
-  cursor: pointer;
+  background: #334155;
+  border-radius: 10px;
 }
 </style>

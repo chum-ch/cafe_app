@@ -6,18 +6,7 @@ const props = defineProps({
     isOpen: Boolean,
     items: {
         type: Array,
-        default: () => [
-            {
-                id: 1,
-                name: 'Caramel Frappuccino',
-                price: 3.95,
-                category: 'Blended',
-                description: 'Velvety caramel syrup blended with premium coffee and chilled milk.',
-                image: 'https://images.pexels.com/photos/374885/pexels-photo-374885.jpeg?auto=compress&cs=tinysrgb&w=400',
-                popular: true,
-                rating: 4.5
-            }
-        ]
+        default: () => []
     }
 });
 
@@ -193,7 +182,7 @@ const checkout = async (items) => {
                                     <h4 class="font-black text-stone-800 text-xl leading-none tracking-tight">
                                         {{ item.name }}
                                     </h4>
-                                    <div class="flex flex-wrap gap-1 pt-2 justify-between">
+                                    <div class="flex flex-wrap gap-1 pt-2">
                                         <div v-if="item.mood"
                                             class="flex items-center p-2 rounded-full text-[10px] font-black uppercase tracking-wider text-white shadow-sm"
                                             :class="CONFIG.moods.find(m => m.id === item.mood)?.color || 'bg-stone-400'">
@@ -232,7 +221,7 @@ const checkout = async (items) => {
                                         <Plus class="w-7 h-7 text-orange-600" />
                                     </button>
                                 </div>
-                                <div class="text-right">
+                                <div class="text-right px-1">
                                     <p class="text-[10px] text-stone-400 uppercase font-black text-center">Subtotal</p>
                                     <span class="font-black text-stone-900 text-lg">
                                         {{ formatCurrency(toNum(item.price) * toNum(item.quantity)) }}

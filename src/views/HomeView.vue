@@ -124,7 +124,7 @@ const removeItem = (id) => {
 
 <template>
   <div class="min-h-screen">
-    <div class="sticky top-0 z-50 backdrop-blur-md px-3 pt-2">
+    <div class="sticky top-0 z-10 backdrop-blur-md pt-2">
       <div class="flex gap-2">
         <div class="w-full m-0 p-0">
           <IconField iconPosition="left">
@@ -160,7 +160,7 @@ const removeItem = (id) => {
 
 
     <PriButton @click="isCartOpen = true"
-      class=" text-white fixed bottom-[10rem] right-4 p-2 shadow-lg shadow-purple-200/50 hover:shadow-purple-200/100 active:scale-95 transition-all duration-300">
+      class=" text-white fixed bottom-[11rem] right-5 p-2 shadow-lg shadow-purple-200/50 hover:shadow-purple-200/100 active:scale-95 transition-all duration-300">
       <ShoppingCart class="" />
       <span class="font-bold ">{{ cartItems.length }}</span>
     </PriButton>

@@ -1,5 +1,5 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterView } from 'vue-router'
 import axios from "axios";
 import Sidebar from './components/Sidebar.vue';
 import { inject, onMounted, ref } from "vue";
@@ -71,34 +71,36 @@ const fullMenu = {
     { "label": "Stock Out", "route": "/inventory/out" }
   ]
 };
-
+const isCollapsedSidebar = ref(true);
 </script>
+
 <template>
-  <div class="">
-    <PriToast position="top-center" class="p-toast-top-center p-3 w-full" />
+  <div class="min-h-screen bg-slate-50 font-sans text-slate-900">
+    <PriToast position="top-center" />
+    
     <MainCafe>
       <template #header>
-        <HeaderView />
+        <HeaderView class="h-16 border-b bg-white relative z-50" />
       </template>
 
       <template #body>
-        <div class="body">
-          <div class="flex h-screen overflow-hidden">
+        <div class="flex h-full relative">
+          
+          <Sidebar v-if="isLoggedIn" />
 
-            <Sidebar v-if="isLoggedIn" />
-
-            <main class="flex-1 overflow-auto">
-              <div class="relative">
-                <div class="text-justify">
-                  <router-view v-slot="{ Component }">
-                    <transition name="fade" mode="out-in">
-                      <component :is="Component" />
-                    </transition>
-                  </router-view>
-                </div>
-              </div>
-            </main>
-          </div>
+          <main 
+            class="flex-1 overflow-auto transition-all duration-300"
+            :class="[isLoggedIn ? (isCollapsedSidebar ? 'ml-24' : 'ml-80') : 'ml-0']"
+          >
+            <div class="max-w-7xl mx-auto p-4">
+              <router-view v-slot="{ Component }">
+                <transition name="fade" mode="out-in">
+                  <component :is="Component" />
+                </transition>
+              </router-view>
+            </div>
+          </main>
+          
         </div>
       </template>
 
