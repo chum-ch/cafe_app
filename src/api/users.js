@@ -18,22 +18,28 @@ export default (axios)=>({
     logout(payload) {
         return axios.post(`${userApi}/v1/auth/logout`, payload);
     },
-    listUsers() {
-        return axios.get(`${userApi}/v1/admin/users`);
+    listUsers(tenantId) {
+        return axios.get(`${userApi}/v1/admin/${tenantId}/users`);
     },
-    createUser(payload) {
-        return axios.post(`${userApi}/v1/admin/users`, payload, additionalConfig);
+    createUser(payload, tenantId) {
+        return axios.post(`${userApi}/v1/admin/${tenantId}/users`, payload, additionalConfig);
     },
     getUserById(userId) {
         return axios.get(`${userApi}/v1/admin/users/${userId}`);
     },
-    updateUserById(userId, payload) {
-        return axios.put(`${userApi}/v1/admin/users/${userId}`, payload, additionalConfig);
+    updateUserById(payload, tenantId, userId) {
+        return axios.put(`${userApi}/v1/admin/${tenantId}/users/${userId}`, payload, additionalConfig);
+    },
+    deleteUser(userId, tenantId) {
+        return axios.delete(`${userApi}/v1/admin/${tenantId}/users/${userId}`, additionalConfig);
     },
     setPwd(payload) {
         return axios.post(`${userApi}/v1/users/set-password`, payload, additionalConfig);
     },
     sendEmail(payload) {
         return axios.post(`${userApi}/v1/users/send-email`, payload, additionalConfig);
+    },
+    checkUserLogin(payload) {
+        return axios.post(`${userApi}/v1/check-user`, payload, additionalConfig);
     },
 })

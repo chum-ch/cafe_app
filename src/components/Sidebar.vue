@@ -11,6 +11,7 @@ import IconCafe from './icons/IconCafe.vue';
 import IconSettings from './icons/IconSettings.vue';
 import IconUsers from './icons/IconUsers.vue';
 import IconBox from './icons/IconBox.vue';
+import { useAuthStore } from '@/stores/auth';
 
 const isCollapsed = ref(true);
 const expandedMenus = ref({});
@@ -18,6 +19,8 @@ const expandedMenus = ref({});
 const route = useRoute();
 const router = useRouter();
 const { emit } = getCurrentInstance();
+const authStore = useAuthStore();
+const userInfo = authStore.getUserSessionStorage();
 defineEmits(['routeChange']);
 
 const menuItems = [
@@ -89,7 +92,9 @@ const getTooltip = (label) => isCollapsed.value ? { value: label, showDelay: 200
         <div class="transition-all duration-300 flex flex-col"
           :class="[isCollapsed ? 'opacity-0 -translate-x-10' : 'opacity-100 translate-x-0']">
           <span class="font-bold text-lg text-white">Cafe App</span>
-          <span class="text-xs text-slate-400">Admin Console</span>
+        
+          <span class="text-xs text-slate-400">{{ userInfo?.FullName }}</span>
+          <span class="text-xs text-slate-400"> {{ userInfo?.Role }}</span>
         </div>
       </div>
     </div>

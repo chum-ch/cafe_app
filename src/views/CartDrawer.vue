@@ -166,7 +166,7 @@ const checkout = async (items) => {
                 </div>
 
                 <TransitionGroup name="list">
-                    <div v-for="item in items" :key="item.id"
+                    <div v-for="item in items" :key="item.name"
                         class="bg-white p-4 rounded-[2rem] border border-stone-100 shadow-sm flex flex-col sm:flex-row gap-4 items-center mb-4 transition-all hover:shadow-md relative overflow-hidden">
 
                         <div class="relative shrink-0">

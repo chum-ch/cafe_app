@@ -87,7 +87,7 @@ const filteredCoffees = computed(() => {
 // const addToCart = (item) => console.log('item', item);
 
 const isCartOpen = ref(false);
-const cartItems = ref([coffees.value[0]]);
+const cartItems = ref([]);
 
 // 1. Add to Cart Logic
 const addToCart = (product) => {
