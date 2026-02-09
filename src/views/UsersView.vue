@@ -235,9 +235,8 @@ onMounted(() => {
       <PriInputText v-model="searchQuery" type="text" placeholder="Search users..." class="" icon="pi pi-search" />
     </PriInputGroup>
 
-
     <div class="p-4">
-      <PriButton label="Add New User" icon="pi pi-user-plus" @click="handleCreateUser" rounded raised />
+      <PriButton label="Add New User" icon="pi pi-user-plus" @click="handleCreateUser" class="" raised />
       <PriDialog v-model:visible="visible" modal :draggable="false" dismissableMask class="mx-3 sm:mx-0 w-full max-w-lg"
         :pt="{
           root: { class: 'rounded-[2rem] border-none shadow-2xl overflow-hidden' },
@@ -379,9 +378,9 @@ onMounted(() => {
                     'bg-red-500': user.status === reverseObject(objUserStatus)[objUserStatus.Inactive]
                   }"></div>
               </div>
-              <h3 class="text-lg font-bold text-black ">{{ user.fullName }}</h3>
-              <PriTag :value="user.status" :severity="getStatusSeverity(user.status)" rounded
-                class="mt-2 text-[10px]" />
+                <h3 class="text-lg font-bold text-black ">{{ user.fullName }}</h3>
+                <PriTag :value="user.status" :severity="getStatusSeverity(user.status)" rounded size="small"
+                  class="mt-2 text-[12px] font-bold" />
             </div>
 
             <div class="space-y-3 bg-surface-50 dark:bg-surface-800/50 p-4 rounded-2xl">
@@ -436,23 +435,16 @@ onMounted(() => {
       </div>
       <div v-else class="flex flex-col items-center justify-center ">
 
-        <div class="flex items-center justify-center w-20 h-20 rounded-full bg-surface-100 dark:bg-surface-800 mb-6">
+        <div class="flex items-center justify-center w-20 h-20 rounded-full bg-surface-100 dark:bg-surface-800">
           <i :class="[
             'text-surface-400 dark:text-surface-500 text-4xl',
             searchQuery ? 'pi pi-search' : 'pi pi-box'
           ]"></i>
         </div>
 
-        <h3 class="text-2xl font-bold text-surface-900 dark:text-surface-0 tracking-tight">
+        <h4 class="text-md font-bold text-surface-900 dark:text-surface-0 tracking-tight">
           {{ searchQuery ? 'No Results Found' : 'No Data Available' }}
-        </h3>
-
-        <p class="text-surface-600 dark:text-surface-400 mt-2 max-w-sm">
-          {{ searchQuery
-            ? 'We couldn\'t find any users matching your search criteria. Try adjusting your filters or search terms.'
-            : 'There are no records to display at the moment.'
-          }}
-        </p>
+        </h4>
       </div>
     </div>
   </div>

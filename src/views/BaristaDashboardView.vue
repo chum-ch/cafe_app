@@ -93,14 +93,12 @@ const simulateOrder = () => {
 </script>
 
 <template>
-    <div class="min-h-screen p-6 select-none font-sans overflow-x-hidden">
+    <div class="min-h-screen select-none font-sans overflow-x-hidden">
 
         <div class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                    <div class="p-2 bg-amber-500 rounded-lg shadow-lg shadow-amber-200">
-                        <Coffee class="text-white w-6 h-6" />
-                    </div>
+                <h1 class="text-3xl font-black">
+                    
                     Barista Workflow
                 </h1>
                 <p class="text-slate-500 font-medium mt-1">
@@ -114,7 +112,7 @@ const simulateOrder = () => {
                     <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                     <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">System Live</span>
                 </div>
-                <PriButton @click="simulateOrder" label="New Ticket" icon="pi pi-plus" severity="warn" class="" />
+                <PriButton @click="simulateOrder" label="New Ticket" icon="pi pi-plus" class="m-2" />
             </div>
         </div>
 
