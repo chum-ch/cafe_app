@@ -5,7 +5,8 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Circle
+  Circle,
+  Coffee,       // For Barista
 } from 'lucide-vue-next';
 import IconCafe from './icons/IconCafe.vue';
 import IconSettings from './icons/IconSettings.vue';
@@ -25,6 +26,7 @@ defineEmits(['routeChange']);
 
 const menuItems = [
   { label: 'Users', icon: IconUsers, route: '/users', key: 'users' },
+  { label: 'Barista', icon: Coffee, route: '/barista', key: 'barista' },
   {
     label: 'Inventory',
     icon: IconBox,

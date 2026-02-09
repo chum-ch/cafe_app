@@ -7,6 +7,15 @@ import IconCafe from "../icons/IconCafe.vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from '@/stores/auth';
 
+const objRole = {
+  Admin: "ADMIN",
+  Barista: "BARISTA",
+  Cashier: "CASHIER",
+  StockControl: "STOCK_CONTROL",
+  Accountant: "ACCOUNTANT",
+  Supplier: "SUPPLIER",
+  Manager: "MANAGER",
+}
 const $api = inject('$api');
 const router = useRouter();
 const authStore = useAuthStore();
@@ -17,8 +26,6 @@ const initialValues = ref(
     password: "",
   }
 );
-
-
 
 const goRegisterForm = () => router.push('/register')
 const goEmailForm = () => router.push('/email')
@@ -44,7 +51,19 @@ const onFormSubmit = async (e) => {
     authStore.login(response.data, 'Bearer xxxx');
     
     // 3. Route to Home
-    router.push('/home');
+    const { Role } = response.data;
+    switch (Role) {
+      case objRole.Admin:
+        router.push('/users');
+        break;
+      case objRole.Barista:
+        router.push('/barista');
+        break;
+    
+      default:
+        router.push('/home');
+        break;
+    }
 
   } catch (error) {
     console.error('Error Login', error);
