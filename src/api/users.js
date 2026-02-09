@@ -5,6 +5,7 @@ let userApi = "https://eaownyg1ak.execute-api.ap-southeast-1.amazonaws.com/dev";
 if (import.meta.env.VITE_USER_API_URL) {
     userApi = import.meta.env.VITE_USER_API_URL;
 }
+
 export default (axios)=>({
     register(payload) {
         return axios.post(`${userApi}/v1/auth/register`, payload, additionalConfig);
