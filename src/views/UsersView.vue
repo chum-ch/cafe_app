@@ -7,7 +7,14 @@ import {
   User,
   Mail,
   ShieldCheck,
-  Phone, Shield,
+  Phone,
+  Shield,
+  Coffee,       // For Barista
+  Banknote,     // For Cashier
+  Package,      // For StockControl
+  Calculator,   // For Accountant
+  Truck,        // For Supplier
+  Briefcase     // For Manager
 } from 'lucide-vue-next';
 import { useAuthStore } from "@/stores/auth";
 const objRole = {
@@ -19,6 +26,15 @@ const objRole = {
   Supplier: "SUPPLIER",
   Manager: "MANAGER",
 }
+const roleIcons = {
+  [objRole.Admin]: ShieldCheck,
+  [objRole.Barista]: Coffee,
+  [objRole.Cashier]: Banknote,
+  [objRole.StockControl]: Package,
+  [objRole.Accountant]: Calculator,
+  [objRole.Supplier]: Truck,
+  [objRole.Manager]: Briefcase,
+};
 const objUserStatus = {
   Active: "ACTIVE",
   Pending: "PENDING",
@@ -28,17 +44,19 @@ const objGender = {
   Male: "MALE",
   Female: "FEMALE",
 }
-const roles = ref(Object.keys(objRole));
-const statuses = ref(Object.keys(objUserStatus));
-const visible = ref(false);
-const isSubmitting = ref(false);
 const authStore = useAuthStore();
 const userInfo = authStore.getUserSessionStorage();
+const $api = inject('$api');
+const roles = ref(Object.keys(objRole));
+const statuses = ref(Object.keys(objUserStatus));
+const isSubmitting = ref(false);
+const searchQuery = ref(""); // New Search Ref
+const visible = ref(false);
+const showDialogDelete = ref(false);
+
 const tenantId = userInfo?.TenantId;
 const emailLogin = userInfo?.Email;
-
-const $api = inject('$api');
-const searchQuery = ref(""); // New Search Ref
+const roleLogin = userInfo?.Role;
 // Ensure role starts as an empty string or undefined so Zod treats it as missing, not "wrong type"
 const initialValues = ref({
   fullName: "",
@@ -70,10 +88,10 @@ const resolver = zodResolver(
     gender: z.string().min(1, "Gender is required"),
     phoneNumber: z.string()
       .min(1, "Phone number is required.")
-      // .refine((val) => {
-      //   const cleaned = val.replace(/\s/g, "");
-      //   return /^0\d{8,9}$/.test(cleaned);
-      // }, "Must start with 0 and be a valid Cambodian number.")
+    // .refine((val) => {
+    //   const cleaned = val.replace(/\s/g, "");
+    //   return /^0\d{8,9}$/.test(cleaned);
+    // }, "Must start with 0 and be a valid Cambodian number.")
   })
 );
 
@@ -125,8 +143,8 @@ const listUsers = async () => {
         role: reverseObject(objRole)[user.Role],
         status: (reverseObject(objUserStatus)[user.Status]),
         gender: user.Gender,
-        phoneNumber: `0${user.Phone.Number}`,
-        countryCode: user.Phone.CountryCode,
+        phoneNumber: user.Phone?.Number ? `0${user.Phone.Number}` : '',
+        countryCode: user.Phone?.CountryCode,
         avatar: user.Avatar,
       };
     });
@@ -153,12 +171,12 @@ const handleCreateUser = async () => {
 const handleDeleteUser = async (id) => {
   try {
     const response = await $api.user.deleteUser(id, tenantId);
-    // console.log('Response', response);
+    console.log('Response', response);
     listUsers();
   } catch (error) {
     console.error('Error Delete User', error);
   } finally {
-    visible.value = false;
+    showDialogDelete.value = false;
   }
 };
 const handleEditUser = (user) => {
@@ -174,7 +192,7 @@ const onFormSubmit = async (e) => {
     const { values } = e;
     // API Call here
     const ph = values.phoneNumber.substring(1);
-    const final =  ph.replace(/\D/g, '');
+    const final = ph.replace(/\D/g, '');
 
     const payload = {
       TenantId: tenantId,
@@ -210,7 +228,6 @@ onMounted(() => {
 
 <template>
   <div class="">
-
     <PriInputGroup class="custom-input-group">
       <PriInputGroupAddon>
         <PriButton icon="pi pi-search" severity="secondary" variant="text" />
@@ -316,17 +333,19 @@ onMounted(() => {
 
             <div class="flex flex-wrap gap-4">
               <div class="flex items-center gap-2">
-                <PriRadioButton v-model="initialValues.gender" inputId="ingredient1" name="gender" :value="objGender.Male" />
+                <PriRadioButton v-model="initialValues.gender" inputId="ingredient1" name="gender"
+                  :value="objGender.Male" />
                 <label for="ingredient1">Male</label>
               </div>
               <div class="flex items-center gap-2">
-                <PriRadioButton v-model="initialValues.gender" inputId="ingredient2" name="gender" :value="objGender.Female" />
+                <PriRadioButton v-model="initialValues.gender" inputId="ingredient2" name="gender"
+                  :value="objGender.Female" />
                 <label for="ingredient2">Female</label>
               </div>
             </div>
 
-            <PriButton type="submit" :label="initialValues.id ? 'Update User' : 'Create Account'" :loading="isSubmitting"
-              :disabled="!$form.valid || isSubmitting" class="" />
+            <PriButton type="submit" :label="initialValues.id ? 'Update User' : 'Create Account'"
+              :loading="isSubmitting" :disabled="!$form.valid || isSubmitting" class="" />
           </Form>
         </div>
       </PriDialog>
@@ -341,7 +360,7 @@ onMounted(() => {
             <div class="flex justify-between items-start">
               <div
                 class="flex items-center gap-2 px-3 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-full">
-                <Shield :size="14" />
+                <component :is="roleIcons[user.role.toUpperCase()] || Shield" :size="14" />
                 <span class="text-xs font-bold uppercase tracking-wider">{{ user.role }}</span>
               </div>
               <PriButton icon="pi pi-ellipsis-v" variant="text" severity="secondary" rounded size="small" />
@@ -349,7 +368,9 @@ onMounted(() => {
 
             <div class="flex flex-col items-center text-center ">
               <div class="relative mb-3">
-                <img :src="user.avatar || 'https://placehold.net/avatar-4.png'" class="w-20 h-20 rounded-2xl object-cover shadow-md" alt="Avatar" />
+                <img :src="user.avatar || 'https://placehold.net/avatar-4.png'"
+                  class="w-20 h-20 object-cover  rounded-full border-4 border-indigo-500 dark:border-surface-900"
+                  alt="Avatar" />
                 <div
                   class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-white dark:border-surface-900"
                   :class="{
@@ -358,34 +379,80 @@ onMounted(() => {
                     'bg-red-500': user.status === reverseObject(objUserStatus)[objUserStatus.Inactive]
                   }"></div>
               </div>
-              <h3 class="text-lg font-bold text-surface-900 dark:text-surface-0">{{ user.fullName }}</h3>
+              <h3 class="text-lg font-bold text-black ">{{ user.fullName }}</h3>
               <PriTag :value="user.status" :severity="getStatusSeverity(user.status)" rounded
                 class="mt-2 text-[10px]" />
             </div>
 
             <div class="space-y-3 bg-surface-50 dark:bg-surface-800/50 p-4 rounded-2xl">
-              <div class="flex items-center gap-3 text-sm text-surface-600 dark:text-surface-400">
+              <div class="flex items-center gap-3 text-sm text-black dark:text-surface-500">
                 <Mail :size="16" class="text-primary-500" />
-                <span class="truncate">{{ user.email }}</span>
+                <span class="truncate ">{{ user.email }}</span>
               </div>
-              <div class="flex items-center gap-3 text-sm text-surface-600 dark:text-surface-400">
+              <div class="flex items-center gap-3 text-sm text-black dark:text-surface-500">
                 <Phone :size="16" class="text-primary-500" />
                 <span>{{ user.phoneNumber }}</span>
               </div>
             </div>
 
-            <div class="flex gap-2 mt-4">
-              <PriButton @click="handleEditUser(user)" label="Edit" icon="pi pi-pencil" fluid outlined rounded size="small" class="flex-1" />
-              <PriButton :disabled="true" @click="handleDeleteUser(user.id)" icon="pi pi-trash" severity="danger" outlined rounded size="small" />
+            <div class="flex gap-2 mt-4"
+              v-if="roleLogin === objRole.Manager || (roleLogin === objRole.Admin && user.role.toUpperCase() !== objRole.Manager)">
+              <PriButton @click="handleEditUser(user)" label="Edit" icon="pi pi-pencil" fluid outlined rounded
+                size="small" class="flex-1 text-indigo-500" />
+              <PriButton @click="showDialogDelete = true" icon="pi pi-trash" class="text-red-500 bordr-red-500"
+                severity="danger" outlined rounded size="small" />
+
+              <PriDialog v-model:visible="showDialogDelete" modal :draggable="false" dismissableMask
+                class="mx-3 sm:mx-0 w-full max-w-lg">
+                <template #header>
+                  <div class="flex items-center gap-3">
+                    <i class="pi pi-exclamation-triangle text-red-600 dark:text-red-400 text-xl"></i>
+                    <h2 class="text-xl font-bold text-surface-900 dark:text-surface-0 tracking-tight">
+                      Confirm Deletion
+                    </h2>
+                  </div>
+                </template>
+
+                <div class="p-2">
+                  <p class="text-surface-600 dark:text-surface-300">
+                    Are you sure you want to delete user
+                    <strong class="font-bold text-indigo-500 dark:text-surface-0">{{ user.email }}</strong>? <br>
+                    This action
+                    <strong class="text-red-600 dark:text-red-400">cannot be undone</strong>.
+                  </p>
+                </div>
+
+                <template #footer>
+                  <div class="flex justify-end gap-2 pt-4">
+                    <PriButton label="Delete User" icon="pi pi-trash" severity="danger" rounded
+                      @click="handleDeleteUser(user.id)" />
+                  </div>
+                </template>
+              </PriDialog>
             </div>
           </div>
 
         </transition-group>
       </div>
-      <div v-else class="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-        <h3 class="text-xl font-bold text-surface-900 dark:text-surface-0">No results found</h3>
-        <p class="text-surface-500">We couldn't find any users matching "{{ searchQuery }}"</p>
-        <PriButton label="Clear Search" variant="text" @click="searchQuery = ''" class="mt-4" />
+      <div v-else class="flex flex-col items-center justify-center ">
+
+        <div class="flex items-center justify-center w-20 h-20 rounded-full bg-surface-100 dark:bg-surface-800 mb-6">
+          <i :class="[
+            'text-surface-400 dark:text-surface-500 text-4xl',
+            searchQuery ? 'pi pi-search' : 'pi pi-box'
+          ]"></i>
+        </div>
+
+        <h3 class="text-2xl font-bold text-surface-900 dark:text-surface-0 tracking-tight">
+          {{ searchQuery ? 'No Results Found' : 'No Data Available' }}
+        </h3>
+
+        <p class="text-surface-600 dark:text-surface-400 mt-2 max-w-sm">
+          {{ searchQuery
+            ? 'We couldn\'t find any users matching your search criteria. Try adjusting your filters or search terms.'
+            : 'There are no records to display at the moment.'
+          }}
+        </p>
       </div>
     </div>
   </div>

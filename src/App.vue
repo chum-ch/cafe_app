@@ -10,6 +10,12 @@ import FooterView from './views/FooterView.vue';
 import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia'; // Import this!
 
+import { Loader2 } from 'lucide-vue-next'; // Import icon
+
+// --- Loading State Setup ---
+const isLoading = ref(false);
+const loadingText = ref('Loading...');
+
 // Reactivity Fix
 const toast = useToast();
 const authStore = useAuthStore();
@@ -25,6 +31,7 @@ const $api = inject("$api");
 onMounted(() => {
   try {
     axios.interceptors.request.use((config) => {
+      isLoading.value = config.showLoading;
       if (config.showToast) {
         toast.add({
           severity: "success",
@@ -41,9 +48,11 @@ onMounted(() => {
     });
     axios.interceptors.response.use(
       (response) => {
+        isLoading.value = false;
         return response;
       },
       (error) => {
+        isLoading.value = false;
         console.error('Error App', error);
         const { message } = error.response.data || {};
         toast.add({
@@ -58,6 +67,7 @@ onMounted(() => {
   } catch (error) {
     console.error("Error", error);
   } finally {
+    isLoading.value = false;
     console.log('finally');
   }
 });
@@ -77,7 +87,7 @@ const isCollapsedSidebar = ref(true);
 <template>
   <div class="min-h-screen font-sans">
     <PriToast position="top-center" class="w-full p-2" />
-    
+
     <MainCafe>
       <template #header>
         <HeaderView class="h-16 border-b bg-white relative z-50" />
@@ -85,13 +95,22 @@ const isCollapsedSidebar = ref(true);
 
       <template #body>
         <div class="flex h-full relative">
-          
+
           <Sidebar v-if="isLoggedIn" />
 
-          <main 
-            class="flex-1 overflow-auto transition-all duration-300"
-            :class="[isLoggedIn ? (isCollapsedSidebar ? 'ml-24' : 'ml-80') : 'ml-0']"
-          >
+          <main class="flex-1 overflow-auto transition-all duration-300 relative"
+            :class="[isLoggedIn ? (isCollapsedSidebar ? 'ml-24' : 'ml-80') : 'ml-0']">
+            <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
+              leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0">
+              <div v-if="isLoading"
+                class="absolute inset-0 flex flex-col items-center justify-center bg-white/70 dark:bg-gray-900/70 backdrop-blur-[2px] z-50">
+                <Loader2 class="w-10 h-10 text-primary-600 animate-spin mb-3" />
+                <span class="text-sm font-medium text-primary-700 dark:text-primary-300 animate-pulse">
+                  Loading...
+                </span>
+              </div>
+            </Transition>
+
             <div class="max-w-7xl mx-auto">
               <router-view v-slot="{ Component }">
                 <transition name="fade" mode="out-in">
@@ -100,7 +119,7 @@ const isCollapsedSidebar = ref(true);
               </router-view>
             </div>
           </main>
-          
+
         </div>
       </template>
 
@@ -113,15 +132,10 @@ const isCollapsedSidebar = ref(true);
 
 <style scoped>
 .blur-bg {
-  background-color: rgba(255, 255, 255, 0.35);
   /* Translucent white */
   backdrop-filter: blur(12px);
   /* Strong blur for frosted glass look */
 }
-
-/* nav a.router-link-exact-active {
-  color: var(--color-text);
-} */
 
 nav a.router-link-exact-active:hover {
   background-color: transparent;
@@ -136,6 +150,7 @@ nav a {
 nav a:first-of-type {
   border: 0;
 }
+
 /* --- Smartphones (landscape) and Small Tablets (portrait) --- */
 /* (e.g., min-width of 576px) */
 
