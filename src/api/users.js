@@ -19,7 +19,7 @@ export default (axios)=>({
         return axios.post(`${userApi}/v1/auth/logout`, payload);
     },
     listUsers(tenantId) {
-        return axios.get(`${userApi}/v1/admin/${tenantId}/users`);
+        return axios.get(`${userApi}/v1/admin/${tenantId}/users`, { showLoading: true});
     },
     createUser(payload, tenantId) {
         return axios.post(`${userApi}/v1/admin/${tenantId}/users`, payload, additionalConfig);
