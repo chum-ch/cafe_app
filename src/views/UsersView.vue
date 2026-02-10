@@ -171,7 +171,7 @@ const handleCreateUser = async () => {
 const handleDeleteUser = async (id) => {
   try {
     const response = await $api.user.deleteUser(id, tenantId);
-    console.log('Response', response);
+    // console.log('Response', response);
     listUsers();
   } catch (error) {
     console.error('Error Delete User', error);
@@ -359,7 +359,7 @@ onMounted(() => {
             <div class="flex justify-between items-start">
               <div
                 class="flex items-center gap-2 px-3 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-full">
-                <component :is="roleIcons[user.role.toUpperCase()] || Shield" :size="14" />
+                <component :is="roleIcons[user.role?.toUpperCase()] || Shield" :size="14" />
                 <span class="text-xs font-bold uppercase tracking-wider">{{ user.role }}</span>
               </div>
               <PriButton icon="pi pi-ellipsis-v" variant="text" severity="secondary" rounded size="small" />
@@ -395,7 +395,7 @@ onMounted(() => {
             </div>
 
             <div class="flex gap-2 mt-4"
-              v-if="roleLogin === objRole.Manager || (roleLogin === objRole.Admin && user.role.toUpperCase() !== objRole.Manager)">
+              v-if="roleLogin === objRole.Manager || (roleLogin === objRole.Admin && user.role?.toUpperCase() !== objRole.Manager)">
               <PriButton @click="handleEditUser(user)" label="Edit" icon="pi pi-pencil" fluid outlined rounded
                 size="small" class="flex-1 text-indigo-500" />
               <PriButton @click="showDialogDelete = true" icon="pi pi-trash" class="text-red-500 bordr-red-500"

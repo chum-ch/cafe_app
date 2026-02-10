@@ -1,24 +1,72 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, inject } from 'vue';
 import {
     Clock, Coffee, Check, GripVertical, UserCheck
 } from 'lucide-vue-next';
 import IconNext from '@/components/icons/IconNext.vue';
-
+import { useAuthStore } from '@/stores/auth';
 // --- Data & State ---
+const $api = inject('$api');
+
+const authStore = useAuthStore();
+const userInfo = authStore.getUserSessionStorage();
+const tenantId = userInfo?.TenantId;
+const userId = userInfo?.EntityItemId;
 const orders = ref([]);
 const orderIdCounter = ref(100);
 const draggedOrder = ref(null);
-const workflowSteps = ['pending', 'prep', 'brewing', 'done'];
+const workflowSteps = ['pending', 'brewing', 'done']; // 'prep',
+const status = {
+    [workflowSteps[0]]: 'PENDING',
+    [workflowSteps[1]]: 'PREPARING',
+    [workflowSteps[2]]: 'BREWING',
+    Completed: 'COMPLETED',
+    Cancelled: 'CANCELLED',
+}
+const CONFIG = {
+    sizes: ['S', 'M', 'L'],
+    sugarLevels: ['30%', '50%', '70%', '100%'],
+    moods: [
+        { id: 'hot', color: 'bg-orange-500', ring: 'ring-orange-100' },
+        { id: 'cold', color: 'bg-blue-500', ring: 'ring-blue-100' }
+    ]
+};
+
+// Define unique styles for each size when selected
+const sizeStyles = {
+    S: 'bg-amber-400 text-white',    // Small = Amber/Gold
+    M: 'bg-orange-500 text-white', // Medium = Orange (The "Default" pop)
+    L: 'bg-emerald-500 text-white' // Large = Emerald/Green
+};
 
 // --- Timer ---
-let timerInterval = null;
-onMounted(() => {
-    timerInterval = setInterval(() => {
-        orders.value.forEach(o => { if (o.status !== 'done') o.elapsedSeconds++; });
-    }, 1000);
-});
-onUnmounted(() => clearInterval(timerInterval));
+// 1. Reactive variable to hold the formatted time
+const liveDateTime = ref('');
+
+// 2. Function to format the date to YYYY-MM-DDTHH:MM:SS
+const formatDateTime = (date) => {
+    const pad = (num) => String(num).padStart(2, '0');
+
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+
+    // --- 12-Hour Conversion Logic ---
+    let hours = date.getHours();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    
+    // Convert 0-23 to 1-12
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    
+    const formattedHours = pad(hours);
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+
+    // Updated format: YYYY-MM-DD (HH:MM:SS AM/PM)
+    return `${year}-${month}-${day} (${formattedHours}:${minutes}:${seconds} ${ampm})`;
+};
+
 
 // --- Transition & Logic Helpers ---
 const formatTime = (seconds) => {
@@ -28,13 +76,17 @@ const formatTime = (seconds) => {
 };
 
 // --- Unified Action Logic ---
-const moveOrderToNextStep = (order) => {
+const moveOrderToNextStep = async (order) => {
     const currentIndex = workflowSteps.indexOf(order.status);
     if (currentIndex < workflowSteps.length - 1) {
         order.status = workflowSteps[currentIndex + 1];
     } else if (order.status === 'done') {
         archiveOrder(order.id);
     }
+
+    // Update the order status call api
+    const response = await $api.order.updateOrderStatus({ Status: status[order.status] }, tenantId, userId, order.orderId);
+    // console.log('Order', response);
 };
 
 const archiveOrder = (orderId) => {
@@ -80,16 +132,73 @@ const onDrop = (e, targetStatus) => {
     draggedOrder.value = null;
 };
 
-// --- Simulation ---
-const simulateOrder = () => {
-    orders.value.push({
-        id: orderIdCounter.value++,
-        customer: ['Alex', 'Jordan', 'Taylor', 'Casey'][Math.floor(Math.random() * 4)],
-        items: [{ name: 'Oat Latte', size: 'M' }],
-        status: 'pending',
-        elapsedSeconds: 0
-    });
+// 1. Create a reference for the polling interval
+let apiPollingInterval = null;
+// 2. Define the refresh logic
+const startApiPolling = () => {
+    // Clear any existing polling to prevent duplicates
+    if (apiPollingInterval) clearInterval(apiPollingInterval);
+
+    apiPollingInterval = setInterval(async () => {
+        console.log('Refreshing orders from API...');
+        await listOrders();
+    }, 60000); // 60,000ms = 1 minute
 };
+
+const listOrders = async () => {
+    try {
+        const response = await $api.order.listOrders(tenantId, userId);
+        // Restructure the data to match the UI
+        // Excluded the "Completed" and "Cancelled" orders
+        const ord = response.data.filter(o => o.Status !== 'COMPLETED' && o.Status !== 'CANCELLED').map(o => {
+            return {
+                orderId: o.EntityItemId,
+                id: 0,
+                // customer: '',
+                name: o.Name,
+                size: o.Size,
+                sugar: o.Sugar,
+                mood: o.Mood.toLowerCase(),
+                status: o.Status.toLowerCase(),
+                orderDate: o.OrderDate || o.CreatedAt,
+                quantity: o.Quantity,
+                elapsedSeconds: 0
+            };
+        });
+        orders.value = ord;
+        // console.log('Response', ord);
+    } catch (error) {
+        console.error('Error List Orders', error);
+    } finally {
+        // console.log('finally');
+    }
+};
+
+let timerInterval = null;
+// 3. Function to update the ref
+const updateClock = () => {
+    liveDateTime.value = formatDateTime(new Date());
+};
+
+onMounted(() => {
+    // Initial fetch
+    listOrders();
+
+    // Start the 1min API polling
+    // startApiPolling();
+
+    // Start the 1s UI clock
+    updateClock();
+    timerInterval = setInterval(updateClock, 1000); // Updates every second
+
+});
+
+onUnmounted(() => {
+    // Clean up BOTH intervals
+    if (timerInterval) clearInterval(timerInterval);
+    if (apiPollingInterval) clearInterval(apiPollingInterval);
+});
+
 </script>
 
 <template>
@@ -98,7 +207,7 @@ const simulateOrder = () => {
         <div class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-3xl font-black">
-                    
+
                     Barista Workflow
                 </h1>
                 <p class="text-slate-500 font-medium mt-1">
@@ -108,11 +217,18 @@ const simulateOrder = () => {
 
             <div class="flex items-center gap-4">
                 <div
-                    class="hidden sm:flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-slate-200 shadow-sm">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">System Live</span>
+                    class="hidden sm:flex items-center gap-2.5 px-3 py-1.5 bg-indigo-500 dark:bg-gray-800 rounded-full border border-surface-200 dark:border-surface-700 shadow-inner text-surface-900 dark:text-white">
+                    <div class="relative flex h-2.5 w-2.5">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-surface-600 dark:text-surface-300">
+                        {{ liveDateTime }}
+                    </span>
                 </div>
-                <PriButton @click="simulateOrder" label="New Ticket" icon="pi pi-plus" class="m-2" />
+
+                <div class=""></div>
             </div>
         </div>
 
@@ -155,18 +271,47 @@ const simulateOrder = () => {
                             @dragstart="onDragStart($event, order)" @dragend="onDragEnd"
                             class="group relative bg-white p-4 rounded-2xl shadow-sm border-slate-100 transition-all duration-300 cursor-grab active:cursor-grabbing overflow-hidden">
                             <div class="flex justify-between items-start mb-3">
-                                <span class="text-[10px] font-black text-amber-500 ">#{{ order.id }}</span>
-                                <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10px] font-bold transition-colors"
+                                <div class="items-center gap-1.5 px-2 py-1 rounded-lg border text-[10px] font-bold transition-colors"
                                     :class="order.elapsedSeconds > 180 ? 'bg-red-50 text-red-500 border-red-100' : 'bg-slate-50 text-slate-400 border-slate-100'">
-                                    <Clock class="w-3 h-3" /> {{ formatTime(order.elapsedSeconds) }}
+                                <h3 class="font-black text-amber-500 text-center font-bold text-[13px]">Order ID: {{ order.id }}</h3>
+                                     {{ formatDateTime(new Date(order.orderDate)) }}
                                 </div>
                             </div>
 
-                            <h3 class="font-bold text-slate-800 leading-tight">{{ order.customer }}</h3>
-                            <p class="text-xs text-slate-500 mt-1 mb-4 flex items-center gap-1">
-                                <span class="font-bold text-slate-400">{{ order.items[0].size }}</span>
-                                {{ order.items[0].name }}
-                            </p>
+                            <h3 class="font-bold text-slate-800 leading-tight text-center">{{ order.name }}</h3>
+                            <div class="my-3">
+
+                                <div class="order-details text-black">
+                                    <label for="">Mood</label>
+                                    <span v-if="order.mood"
+                                        class="text-center px-3 py-1 rounded-full text-[10px] font-black uppercase  text-white shadow-sm"
+                                        :class="CONFIG.moods.find(m => m.id === order.mood)?.color || 'bg-stone-400'">
+                                        {{ order.mood }}
+                                    </span>
+                                </div>
+                                <div class="order-details text-black">
+                                    <label for="">Size</label>
+                                    <span v-if="order.size"
+                                        class="flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-black uppercase border shadow-sm"
+                                        :class="sizeStyles[order.size] || 'bg-stone-100 text-stone-500 border-stone-200'">
+                                        {{ order.size }}
+                                    </span>
+                                </div>
+                                <div class="order-details text-black">
+                                    <label for="">Sugar</label>
+                                    <span v-if="order.sugar"
+                                        class="flex items-center px-3 py-1 rounded-full bg-white border border-stone-200 text-stone-500 text-[10px] font-black shadow-sm uppercase">
+                                        {{ order.sugar }}
+                                    </span>
+                                </div>
+                                <div class="order-details text-black">
+                                    <label for="">{{ order.quantity > 1 ? 'Quantities' : 'Quantity' }}</label>
+                                    <span v-if="order.quantity"
+                                        class="flex items-center px-3 py-1 rounded-full bg-white border border-stone-200 text-stone-500 text-[10px] font-black shadow-sm uppercase">
+                                        {{ order.quantity }}
+                                    </span>
+                                </div>
+                            </div>
 
                             <div class="flex justify-center">
                                 <button @click="moveOrderToNextStep(order)"
@@ -179,9 +324,9 @@ const simulateOrder = () => {
                                     ]">
                                     <div class="flex" v-if="step !== 'done'">
                                         <span class="m-2">Next</span>
-                                        <IconNext/>
+                                        <IconNext />
                                     </div>
-                                    <Check v-else/>
+                                    <Check v-else />
                                 </button>
 
                             </div>
@@ -217,6 +362,12 @@ const simulateOrder = () => {
 </template>
 <style scoped>
 /* MAGIC ANIMATION: This handles the smooth sliding between columns */
+.order-details {
+    display: flex;
+    justify-content: space-between;
+    margin: .4rem 0;
+}
+
 .order-list-move {
     transition: all 0.6s cubic-bezier(0.55, 0, 0.1, 1);
 }
