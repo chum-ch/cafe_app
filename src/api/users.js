@@ -1,6 +1,6 @@
 const additionalConfig = { showToast: true }
-let userApi = "https://eaownyg1ak.execute-api.ap-southeast-1.amazonaws.com/dev";
-// let userApi = "http://localhost:3008";
+// let userApi = "https://eaownyg1ak.execute-api.ap-southeast-1.amazonaws.com/dev";
+let userApi = "http://localhost:3008";
 // console.log("User API URL:", import.meta.env.VITE_USER_API_URL);
 if (import.meta.env.VITE_USER_API_URL) {
     userApi = import.meta.env.VITE_USER_API_URL;
@@ -20,19 +20,19 @@ export default (axios)=>({
         return axios.post(`${userApi}/v1/auth/logout`, payload);
     },
     listUsers(tenantId) {
-        return axios.get(`${userApi}/v1/admin/${tenantId}/users`, { showLoading: true});
+        return axios.get(`${userApi}/v1/${tenantId}/admin/users`, { showLoading: true});
     },
     createUser(payload, tenantId) {
-        return axios.post(`${userApi}/v1/admin/${tenantId}/users`, payload, additionalConfig);
+        return axios.post(`${userApi}/v1/${tenantId}/admin/users`, payload, additionalConfig);
     },
-    getUserById(userId) {
-        return axios.get(`${userApi}/v1/admin/users/${userId}`);
+    getUserById(userId, tenantId) {
+        return axios.get(`${userApi}/v1/${tenantId}/admin/users/${userId}`);
     },
     updateUserById(payload, tenantId, userId) {
-        return axios.put(`${userApi}/v1/admin/${tenantId}/users/${userId}`, payload, additionalConfig);
+        return axios.put(`${userApi}/v1/${tenantId}/admin/users/${userId}`, payload, additionalConfig);
     },
     deleteUser(userId, tenantId) {
-        return axios.delete(`${userApi}/v1/admin/${tenantId}/users/${userId}`, additionalConfig);
+        return axios.delete(`${userApi}/v1/${tenantId}/admin/users/${userId}`, additionalConfig);
     },
     setPwd(payload) {
         return axios.post(`${userApi}/v1/users/set-password`, payload, additionalConfig);

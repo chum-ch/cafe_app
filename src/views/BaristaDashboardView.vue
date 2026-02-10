@@ -1,15 +1,41 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, inject } from 'vue';
 import {
     Clock, Coffee, Check, GripVertical, UserCheck
 } from 'lucide-vue-next';
 import IconNext from '@/components/icons/IconNext.vue';
-
+import { useAuthStore } from '@/stores/auth';
 // --- Data & State ---
+const $api = inject('$api');
+
+const authStore = useAuthStore();
+const userInfo = authStore.getUserSessionStorage();
+const tenantId = userInfo?.TenantId;
+const userId = userInfo?.EntityItemId;
 const orders = ref([]);
 const orderIdCounter = ref(100);
 const draggedOrder = ref(null);
-const workflowSteps = ['pending', 'prep', 'brewing', 'done'];
+const workflowSteps = ['pending', 'brewing', 'done']; // 'prep',
+const status = {
+    [workflowSteps[0]]: 'PENDING',
+    [workflowSteps[1]]: 'PREPARING',
+    [workflowSteps[2]]: 'BREWING'
+}
+const CONFIG = {
+    sizes: ['S', 'M', 'L'],
+    sugarLevels: ['30%', '50%', '70%', '100%'],
+    moods: [
+        { id: 'hot', color: 'bg-orange-500', ring: 'ring-orange-100' },
+        { id: 'cold', color: 'bg-blue-500', ring: 'ring-blue-100' }
+    ]
+};
+
+// Define unique styles for each size when selected
+const sizeStyles = {
+    S: 'bg-amber-400 text-white',    // Small = Amber/Gold
+    M: 'bg-orange-500 text-white', // Medium = Orange (The "Default" pop)
+    L: 'bg-emerald-500 text-white' // Large = Emerald/Green
+};
 
 // --- Timer ---
 let timerInterval = null;
@@ -28,13 +54,17 @@ const formatTime = (seconds) => {
 };
 
 // --- Unified Action Logic ---
-const moveOrderToNextStep = (order) => {
+const moveOrderToNextStep = async (order) => {
     const currentIndex = workflowSteps.indexOf(order.status);
     if (currentIndex < workflowSteps.length - 1) {
         order.status = workflowSteps[currentIndex + 1];
     } else if (order.status === 'done') {
         archiveOrder(order.id);
     }
+
+    // Update the order status call api
+    const response = await $api.order.updateOrderStatus({ Status: status[order.status] }, tenantId, userId, order.orderId);
+    console.log('Order',response);
 };
 
 const archiveOrder = (orderId) => {
@@ -90,6 +120,35 @@ const simulateOrder = () => {
         elapsedSeconds: 0
     });
 };
+
+const listOrders = async () => {
+    try {
+        const response = await $api.order.listOrders(tenantId, userId);
+        // Restructure the data to match the UI
+        const ord = response.data.map(o => {
+            return {
+                orderId: o.EntityItemId,
+                id: 0,
+                // customer: '',
+                name: o.Name,
+                size: o.Size,
+                sugar: o.Sugar,
+                mood: o.Mood.toLowerCase(),
+                status: o.Status.toLowerCase(),
+                elapsedSeconds: 0
+            };
+        });
+        orders.value = ord;
+        console.log('Response', ord);
+    } catch (error) {
+        console.error('Error List Orders', error);
+    } finally {
+        console.log('finally');
+    }
+};
+onMounted(() => {
+    listOrders();
+});
 </script>
 
 <template>
@@ -98,7 +157,7 @@ const simulateOrder = () => {
         <div class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-3xl font-black">
-                    
+
                     Barista Workflow
                 </h1>
                 <p class="text-slate-500 font-medium mt-1">
@@ -108,11 +167,18 @@ const simulateOrder = () => {
 
             <div class="flex items-center gap-4">
                 <div
-                    class="hidden sm:flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-slate-200 shadow-sm">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">System Live</span>
+                    class="hidden sm:flex items-center gap-2.5 px-3 py-1.5 bg-indigo-500 dark:bg-gray-800 rounded-full border border-surface-200 dark:border-surface-700 shadow-inner text-surface-900 dark:text-white">
+                    <div class="relative flex h-2.5 w-2.5">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-surface-600 dark:text-surface-300">
+                        System Live
+                    </span>
                 </div>
-                <PriButton @click="simulateOrder" label="New Ticket" icon="pi pi-plus" class="m-2" />
+
+                <div class=""></div>
             </div>
         </div>
 
@@ -155,18 +221,40 @@ const simulateOrder = () => {
                             @dragstart="onDragStart($event, order)" @dragend="onDragEnd"
                             class="group relative bg-white p-4 rounded-2xl shadow-sm border-slate-100 transition-all duration-300 cursor-grab active:cursor-grabbing overflow-hidden">
                             <div class="flex justify-between items-start mb-3">
-                                <span class="text-[10px] font-black text-amber-500 ">#{{ order.id }}</span>
+                                <h3 class="font-black text-amber-500 ">#{{ order.id }}</h3>
                                 <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10px] font-bold transition-colors"
                                     :class="order.elapsedSeconds > 180 ? 'bg-red-50 text-red-500 border-red-100' : 'bg-slate-50 text-slate-400 border-slate-100'">
                                     <Clock class="w-3 h-3" /> {{ formatTime(order.elapsedSeconds) }}
                                 </div>
                             </div>
 
-                            <h3 class="font-bold text-slate-800 leading-tight">{{ order.customer }}</h3>
-                            <p class="text-xs text-slate-500 mt-1 mb-4 flex items-center gap-1">
-                                <span class="font-bold text-slate-400">{{ order.items[0].size }}</span>
-                                {{ order.items[0].name }}
-                            </p>
+                            <h3 class="font-bold text-slate-800 leading-tight text-center">{{ order.name }}</h3>
+                            <div class="my-3">
+
+                                <div class="order-details text-black">
+                                    <label for="">Mood</label>
+                                    <span v-if="order.mood"
+                                        class="text-center px-3 py-1 rounded-full text-[10px] font-black uppercase  text-white shadow-sm"
+                                        :class="CONFIG.moods.find(m => m.id === order.mood)?.color || 'bg-stone-400'">
+                                        {{ order.mood }}
+                                    </span>
+                                </div>
+                                <div class="order-details text-black">
+                                    <label for="">Size</label>
+                                    <span v-if="order.size"
+                                        class="flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-black uppercase border shadow-sm"
+                                        :class="sizeStyles[order.size] || 'bg-stone-100 text-stone-500 border-stone-200'">
+                                        {{ order.size }}
+                                    </span>
+                                </div>
+                                <div class="order-details text-black">
+                                    <label for="">Sugar</label>
+                                    <span v-if="order.sugar"
+                                        class="flex items-center px-3 py-1 rounded-full bg-white border border-stone-200 text-stone-500 text-[10px] font-black shadow-sm uppercase">
+                                        {{ order.sugar }}
+                                    </span>
+                                </div>
+                            </div>
 
                             <div class="flex justify-center">
                                 <button @click="moveOrderToNextStep(order)"
@@ -179,9 +267,9 @@ const simulateOrder = () => {
                                     ]">
                                     <div class="flex" v-if="step !== 'done'">
                                         <span class="m-2">Next</span>
-                                        <IconNext/>
+                                        <IconNext />
                                     </div>
-                                    <Check v-else/>
+                                    <Check v-else />
                                 </button>
 
                             </div>
@@ -217,6 +305,12 @@ const simulateOrder = () => {
 </template>
 <style scoped>
 /* MAGIC ANIMATION: This handles the smooth sliding between columns */
+.order-details {
+    display: flex;
+    justify-content: space-between;
+    margin: .4rem 0;
+}
+
 .order-list-move {
     transition: all 0.6s cubic-bezier(0.55, 0, 0.1, 1);
 }
