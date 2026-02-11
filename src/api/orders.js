@@ -1,6 +1,6 @@
 const additionalConfig = { showToast: true }
-// let userApi = "https://eaownyg1ak.execute-api.ap-southeast-1.amazonaws.com/dev";
-let userApi = "http://localhost:3008";
+let userApi = "https://eaownyg1ak.execute-api.ap-southeast-1.amazonaws.com/dev";
+// let userApi = "http://localhost:3008";
 // console.log("User API URL:", import.meta.env.VITE_USER_API_URL);
 if (import.meta.env.VITE_USER_API_URL) {
     userApi = import.meta.env.VITE_USER_API_URL;
