@@ -1,6 +1,7 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, inject } from 'vue';
 import { X, Plus, Minus, Trash2, ShoppingCart, Flame, Snowflake } from 'lucide-vue-next';
+import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps({
     isOpen: Boolean,
@@ -10,6 +11,15 @@ const props = defineProps({
     }
 });
 
+const $api = inject('$api');
+const authStore = useAuthStore();
+const userInfo = authStore.getUserSessionStorage();
+const tenantId = userInfo?.TenantId;
+const userId = userInfo?.EntityItemId;
+const mood = {
+    hot: 'HOT',
+    cold: 'COLD'
+}
 const emit = defineEmits(['close', 'update-quantity', 'remove-item', 'checkout']);
 
 // --- HELPER: Safe Number Conversion ---
@@ -115,14 +125,31 @@ const expandCartItems = (items) => {
 
 const checkout = async (items) => {
     // 1. Expand the cart items
-    const expandedItems = expandCartItems(items);
-    console.log('expandedItems', expandedItems);
+    // console.log('expandedItems', expandedItems);
+    // const expandedItems = expandCartItems(items);
 
+    const restrcuturedCoffees = items.map(coffee => {
+        return {
+            Name: coffee.name,
+            Price: coffee.price,
+            Category: coffee.category,
+            Description: coffee.description,
+            Image: coffee.image,
+            Popular: coffee.popular,
+            Rating: coffee.rating,
+            Size: coffee.size,
+            Mood: mood[coffee.mood],
+            Sugar: coffee.sugar,
+            Quantity: coffee.quantity
+        }
+    })
+    // console.log('Restructured', restrcuturedCoffees);
     // 2. Call the checkout API
-    // const response = await $api.user.checkout(expandedItems);
+    const response = await $api.order.createOrder(restrcuturedCoffees, tenantId, userId);
     // console.log('response', response);
     // 3. Emit the checkout event
-    emit('checkout', expandedItems);
+    emit('checkout', restrcuturedCoffees);
+    emit('close');
 };
 </script>
 
@@ -144,7 +171,7 @@ const checkout = async (items) => {
                         <h3 class="text-xl font-bold font-black text-stone-900 leading-none">My Cart</h3>
                         <div class="flex gap-2 items-center">
                             <p class="text-sm"> <span class="text-orange-600 font-black font-bold">{{ items.length
-                            }}</span> {{ pluralize(items.length, 'Item') }}</p>
+                                    }}</span> {{ pluralize(items.length, 'Item') }}</p>
                             <p class="text-sm text-stone-500"> <span class="text-orange-600 font-black font-bold">{{
                                 totalItemsCount }}</span> {{ pluralize(totalItemsCount, 'Quantity') }}</p>
 
@@ -171,10 +198,8 @@ const checkout = async (items) => {
 
                         <div class="relative shrink-0">
                             <img :src="item.image" class="w-28 h-28 rounded-[1.5rem] object-cover shadow-inner" />
-                            <div
-                                class="absolute -bottom-2 -right-2 px-3 py-1 rounded-full ring-4 ring-white shadow-md"
-                                :class="sizeStyles[item.size] || 'bg-orange-500'"
-                                >
+                            <div class="absolute -bottom-2 -right-2 px-3 py-1 rounded-full ring-4 ring-white shadow-md"
+                                :class="sizeStyles[item.size] || 'bg-orange-500'">
                                 <p class="text-white font-black text-sm tabular-nums">
                                     {{ formatCurrency(item.price) }}
                                 </p>
@@ -208,8 +233,7 @@ const checkout = async (items) => {
                                     </div>
                                 </div>
 
-                                <button
-                                    class="p-2 text-red-400 hover:text-red-500 transition-colors">
+                                <button class="p-2 text-red-400 hover:text-red-500 transition-colors">
                                     <Trash2 :size="20" @click="emit('remove-item', item.id)" class="cursor-pointer" />
                                 </button>
                             </div>

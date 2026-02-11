@@ -8,9 +8,12 @@ if (import.meta.env.VITE_USER_API_URL) {
 
 export default (axios)=>({
     listOrders(tenantId, userId) {
-        return axios.get(`${userApi}/v1/${tenantId}/users/${userId}/orders`, { showToast: false, showLoading: true });
+        return axios.get(`${userApi}/v1/${tenantId}/users/${userId}/orders`, { showToast: false, showLoading: false });
     },
     updateOrderStatus(payload, tenantId, userId, orderId) {
         return axios.patch(`${userApi}/v1/${tenantId}/users/${userId}/orders/${orderId}`, payload, { showToast: false });
+    },
+    createOrder(payload, tenantId, userId) {
+        return axios.post(`${userApi}/v1/${tenantId}/users/${userId}/orders`, payload, { showToast: true });
     },
 })

@@ -132,6 +132,7 @@ const filteredUsers = computed(() => {
 const listUsers = async () => {
   try {
     const response = await $api.user.listUsers(tenantId);
+    console.log('Response', response.data);
     // Exclude the current user
     const exludedUser = response.data.filter(user => user.Email !== emailLogin);
     // Retstrunct the user list
@@ -388,7 +389,7 @@ onMounted(() => {
                 <Mail :size="16" class="text-primary-500" />
                 <span class="truncate ">{{ user.email }}</span>
               </div>
-              <div class="flex items-center gap-3 text-sm text-black dark:text-surface-500">
+              <div v-if="user.phoneNumber" class="flex items-center gap-3 text-sm text-black dark:text-surface-500">
                 <Phone :size="16" class="text-primary-500" />
                 <span>{{ user.phoneNumber }}</span>
               </div>

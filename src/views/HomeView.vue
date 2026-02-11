@@ -123,7 +123,10 @@ const removeItem = (id) => {
   // Using filter creates a new array reference, which Vue definitely tracks
   cartItems.value = cartItems.value.filter(item => item.id !== id);
 };
-
+// 4. already checkout reset the cart
+const checkout = (items) => {
+  cartItems.value = [];
+};
 </script>
 
 <template>
@@ -170,7 +173,9 @@ const removeItem = (id) => {
     </PriButton>
 
     <CartDrawer :is-open="isCartOpen" :items="cartItems" @close="isCartOpen = false" @update-quantity="updateQuantity"
-      @remove-item="removeItem" />
+      @remove-item="removeItem"
+      @checkout="checkout"
+      />
   </div>
 </template>
 
