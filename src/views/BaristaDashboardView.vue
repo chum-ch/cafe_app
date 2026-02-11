@@ -162,7 +162,7 @@ const listOrders = async () => {
                 status: o.Status.toLowerCase(),
                 orderDate: o.OrderDate || o.CreatedAt,
                 quantity: o.Quantity,
-                elapsedSeconds: 0
+                orderCode: o.OrderCode,
             };
         });
         orders.value = ord;
@@ -273,7 +273,7 @@ onUnmounted(() => {
                             <div class="flex justify-between items-start mb-3">
                                 <div class="items-center gap-1.5 px-2 py-1 rounded-lg border text-[10px] font-bold transition-colors"
                                     :class="order.elapsedSeconds > 180 ? 'bg-red-50 text-red-500 border-red-100' : 'bg-slate-50 text-slate-400 border-slate-100'">
-                                <h3 class="font-black text-amber-500 text-center font-bold text-[13px]">Order ID: {{ order.id }}</h3>
+                                <h3 class="font-black text-amber-500 text-center font-bold text-[13px]">Order ID: {{ order.orderCode }}</h3>
                                      {{ formatDateTime(new Date(order.orderDate)) }}
                                 </div>
                             </div>
