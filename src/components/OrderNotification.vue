@@ -100,8 +100,8 @@ const handleToastClick = (notification) => {
 
 onMounted(() => {
     alertSound = new Audio('/sounds/notification.wav');
-    // const socketServerUrl = `http://localhost:3008`;
-    const socketServerUrl = `https://eaownyg1ak.execute-api.ap-southeast-1.amazonaws.com/dev`;
+    const socketServerUrl = `http://localhost:3008`;
+    // const socketServerUrl = `https://eaownyg1ak.execute-api.ap-southeast-1.amazonaws.com/dev`;
     socket = io(socketServerUrl, {
         query: { tenantId, userId }
     });
