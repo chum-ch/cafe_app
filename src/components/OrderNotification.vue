@@ -59,8 +59,9 @@ const tenantId = userInfo?.TenantId;
 const userId = userInfo?.EntityItemId; // Optional, useful for tracking connection
 // --- Audio Handling ---
 const unlockAudio = () => {
+    const s3Url = 'https://public-images-cn.s3.ap-southeast-1.amazonaws.com/notification.mp3';
     // We create the audio object on user interaction to bypass browser autoplay policies
-    alertSound = new Audio('/public/sounds/notification.mp3'); // Ensure this file exists in /public/sounds/
+    alertSound = new Audio(s3Url);
     alertSound.play()
         .then(() => {
             alertSound.pause();
