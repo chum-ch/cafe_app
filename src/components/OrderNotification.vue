@@ -22,7 +22,12 @@
                         <div class="toast-details">
                             <strong class="toast-title">New Order!</strong>
                             <p class="toast-subtitle">
-                                #{{ notification.OrderCode }} - {{ notification.Name }} ({{ notification.Size }})
+                                <span v-if="Array.isArray(notification.data) && notification.data.length > 1">
+                                    <span class="text-orange-500">{{ notification.data.length }} </span> items
+                                </span>
+                                <span v-else>
+                                    #{{ notification.OrderCode }} - {{ notification.Name }}
+                                </span>
                             </p>
                         </div>
                     </div>
@@ -39,51 +44,105 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { io } from "socket.io-client";
 import { useAuthStore } from '@/stores/auth';
 
-// --- FIXED: Define both events here ---
 const emit = defineEmits(['order-action', 'new-order-received']);
 
 const notifications = ref([]);
 const isAudioUnlocked = ref(false);
-let socket = null;
+const ws = ref(null); // WebSocket reference
 let alertSound = null;
 
 const authStore = useAuthStore();
 const userInfo = authStore.getUserSessionStorage();
 const tenantId = userInfo?.TenantId;
-const userId = userInfo?.EntityItemId;
+const userId = userInfo?.EntityItemId; // Optional, useful for tracking connection
 
-// Method to Unlock Audio
+// --- Audio Handling ---
 const unlockAudio = () => {
-    if (alertSound) {
-        alertSound.play()
-            .then(() => {
-                alertSound.pause();
-                alertSound.currentTime = 0;
-                isAudioUnlocked.value = true;
-            })
-            .catch(e => console.error("Could not unlock audio", e));
-    }
+    // We create the audio object on user interaction to bypass browser autoplay policies
+    alertSound = new Audio('/sounds/notification.wav'); // Ensure this file exists in /public/sounds/
+    alertSound.play()
+        .then(() => {
+            alertSound.pause();
+            alertSound.currentTime = 0;
+            isAudioUnlocked.value = true;
+        })
+        .catch(e => console.error("Could not unlock audio", e));
 };
 
-const handleNewOrder = (orderData) => {
-    const notification = {
-        ...orderData,
-        id: Date.now() + Math.random()
-    };
-
-    notifications.value.push(notification);
-
-    // --- NEW: Emit to BaristaFlow.vue to refresh the list ---
-    emit('new-order-received', notification);
-
+const playSound = () => {
     if (alertSound && isAudioUnlocked.value) {
         alertSound.currentTime = 0;
         alertSound.play().catch(e => console.error("Sound play failed:", e));
     }
+};
 
+// --- WebSocket Logic ---
+onMounted(() => {
+    // 1. Define AWS WebSocket URL
+    // REPLACE with your actual API Gateway WebSocket URL
+    const WSS_URL = `wss://6jo7ogtbc6.execute-api.ap-southeast-1.amazonaws.com/dev`; 
+    
+    // 2. Connect
+    // console.log(`Connecting to WebSocket: ${WSS_URL}?tenantId=${tenantId}`);
+    ws.value = new WebSocket(`${WSS_URL}?tenantId=${tenantId}`);
+
+    // 3. Handle Open
+    ws.value.onopen = () => {
+        console.log("✅ WebSocket Connected");
+    };
+
+    // 4. Handle Message (New Order)
+    ws.value.onmessage = (event) => {
+        // console.log("📩 Message received:", event.data);
+        try {
+            const parsedData = JSON.parse(event.data);
+            handleNewOrder(parsedData);
+        } catch (e) {
+            console.error("Error parsing WebSocket message:", e);
+        }
+    };
+
+    // 5. Handle Errors
+    ws.value.onerror = (error) => {
+        console.error("❌ WebSocket Error:", error);
+    };
+
+    // 6. Handle Close (Auto-reconnect logic could go here)
+    ws.value.onclose = () => {
+        console.log("⚠️ WebSocket Disconnected");
+    };
+});
+
+onUnmounted(() => {
+    if (ws.value) {
+        ws.value.close();
+    }
+});
+
+// --- Notification Logic ---
+const handleNewOrder = (orderData) => {
+    console.log('New order detected via socket!', orderData);
+    // 1. Create notification object
+    const notification = {
+        data: orderData, // Store the raw data
+        // Flatten properties for easier display if it's a single item, 
+        // or handle array logic in template
+        ...((Array.isArray(orderData) && orderData.length > 0) ? orderData[0] : orderData), 
+        id: Date.now() + Math.random()
+    };
+
+    // 2. Add to list
+    notifications.value.push(notification);
+
+    // 3. Emit event to Parent (BaristaFlow) to refresh API list
+    emit('new-order-received', orderData);
+
+    // 4. Play Sound
+    playSound();
+
+    // 5. Auto-remove after 8 seconds
     setTimeout(() => {
         removeNotification(notification.id);
     }, 8000);
@@ -97,23 +156,6 @@ const handleToastClick = (notification) => {
     emit('order-action', notification);
     removeNotification(notification.id);
 };
-
-// onMounted(() => {
-//     alertSound = new Audio('/sounds/notification.wav');
-//     const socketServerUrl = `http://localhost:3008`;
-//     // const socketServerUrl = `https://eaownyg1ak.execute-api.ap-southeast-1.amazonaws.com/dev`;
-//     socket = io(socketServerUrl, {
-//         query: { tenantId, userId }
-//     });
-
-//     socket.on("newOrder", (orderData) => {
-//         handleNewOrder(orderData);
-//     });
-// });
-
-onUnmounted(() => {
-    if (socket) socket.disconnect();
-});
 </script>
 
 <style scoped>
@@ -192,6 +234,7 @@ onUnmounted(() => {
 }
 
 /* Toast Card */
+
 .toast-notification {
     background: white;
     color: #1f2937;
@@ -203,9 +246,10 @@ onUnmounted(() => {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     border: 1px solid #f3f4f6;
     cursor: pointer;
-    position: relative;
+    position: relative; /* Important for absolute progress bar */
     overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s;
+    margin-bottom: 10px; /* Add spacing between multiple toasts */
 }
 
 .toast-notification:hover {

@@ -87,7 +87,7 @@ const moveOrderToNextStep = async (order) => {
 
     // Update the order status call api
     const response = await $api.order.updateOrderStatus({ Status: status[order.status] }, tenantId, userId, order.orderId);
-    console.log('Order', response.data);
+    // console.log('Order', response.data);
 };
 
 const archiveOrder = (orderId) => {
@@ -181,16 +181,14 @@ const updateClock = () => {
     liveDateTime.value = formatDateTime(new Date());
 };
 
-// 2. NEW: Handle notification action
-const handleNewOrderReceived = (notificationData) => {
-    console.log('Notification clicked', notificationData);
-    // Option A: Just refresh the whole list
-    listOrders();
-    // Option B: If you want to highlight the specific order, you would do that here
-};
+// // 2. NEW: Handle notification action
+// const handleNewOrderReceived = (notificationData) => {
+//     // Option A: Just refresh the whole list
+//     listOrders();
+//     // Option B: If you want to highlight the specific order, you would do that here
+// };
 // NEW: Function to handle the real-time event
-const onNewOrderDetected = (orderData) => {
-    console.log('New order detected via socket!', orderData);
+const onNewOrderDetected = () => {
     // Refresh the list immediately
     listOrders(); 
     
@@ -220,7 +218,7 @@ onUnmounted(() => {
 
 <template>
     <div class="min-h-screen select-none font-sans overflow-x-hidden">
-        <OrderNotification @order-action="handleNewOrderReceived" @new-order-received="onNewOrderDetected" />
+        <OrderNotification @new-order-received="onNewOrderDetected" />
         <div class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-3xl font-black">
