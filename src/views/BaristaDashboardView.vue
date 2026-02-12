@@ -5,6 +5,7 @@ import {
 } from 'lucide-vue-next';
 import IconNext from '@/components/icons/IconNext.vue';
 import { useAuthStore } from '@/stores/auth';
+import OrderNotification from '@/components/OrderNotification.vue';
 // --- Data & State ---
 const $api = inject('$api');
 
@@ -86,7 +87,7 @@ const moveOrderToNextStep = async (order) => {
 
     // Update the order status call api
     const response = await $api.order.updateOrderStatus({ Status: status[order.status] }, tenantId, userId, order.orderId);
-    // console.log('Order', response);
+    console.log('Order', response.data);
 };
 
 const archiveOrder = (orderId) => {
@@ -142,7 +143,7 @@ const startApiPolling = () => {
     apiPollingInterval = setInterval(async () => {
         console.log('Refreshing orders from API...');
         await listOrders();
-    }, 60000); // 60,000ms = 1 minute
+    }, 8000); // 60,000ms = 1 minute
 };
 
 const listOrders = async () => {
@@ -180,12 +181,28 @@ const updateClock = () => {
     liveDateTime.value = formatDateTime(new Date());
 };
 
+// 2. NEW: Handle notification action
+const handleNewOrderReceived = (notificationData) => {
+    console.log('Notification clicked', notificationData);
+    // Option A: Just refresh the whole list
+    listOrders();
+    // Option B: If you want to highlight the specific order, you would do that here
+};
+// NEW: Function to handle the real-time event
+const onNewOrderDetected = (orderData) => {
+    console.log('New order detected via socket!', orderData);
+    // Refresh the list immediately
+    listOrders(); 
+    
+    // Optional: Add logic to briefly highlight the new order in the UI
+};
+
 onMounted(() => {
     // Initial fetch
     listOrders();
 
     // Start the 1min API polling
-    // startApiPolling();
+    startApiPolling();
 
     // Start the 1s UI clock
     updateClock();
@@ -203,7 +220,7 @@ onUnmounted(() => {
 
 <template>
     <div class="min-h-screen select-none font-sans overflow-x-hidden">
-
+        <OrderNotification @order-action="handleNewOrderReceived" @new-order-received="onNewOrderDetected" />
         <div class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-3xl font-black">
@@ -217,7 +234,7 @@ onUnmounted(() => {
 
             <div class="flex items-center gap-4">
                 <div
-                    class="hidden sm:flex items-center gap-2.5 px-3 py-1.5 bg-indigo-500 dark:bg-gray-800 rounded-full border border-surface-200 dark:border-surface-700 shadow-inner text-surface-900 dark:text-white">
+                    class="sm:flex items-center gap-2.5 px-3 py-1.5 bg-indigo-500 dark:bg-gray-800 rounded-full border border-surface-200 dark:border-surface-700 shadow-inner text-surface-900 dark:text-white">
                     <div class="relative flex h-2.5 w-2.5">
                         <span
                             class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>

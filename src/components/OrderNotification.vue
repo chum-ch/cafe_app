@@ -1,27 +1,36 @@
 <template>
     <div class="notification-wrapper">
-        <div v-if="!isAudioUnlocked" class="audio-unlock-overlay">
-            <div class="unlock-box">
-                <span class="unlock-icon">🔊</span>
-                <p class="unlock-text">Notification sounds are muted by your browser.</p>
-                <button @click="unlockAudio" class="unlock-btn">
-                    Enable
-                </button>
+        <transition name="fade-overlay">
+            <div v-if="!isAudioUnlocked" class="audio-unlock-overlay">
+                <div class="unlock-box">
+                    <span class="unlock-icon">🔊</span>
+                    <div class="unlock-content">
+                        <strong>Enable Notifications</strong>
+                        <p>Click to enable sound alerts for new orders.</p>
+                    </div>
+                    <button @click="unlockAudio" class="unlock-btn">Enable</button>
+                </div>
             </div>
-        </div>
+        </transition>
 
         <div class="notification-container">
-            <transition-group name="fade">
+            <transition-group name="toast">
                 <div v-for="notification in notifications" :key="notification.id" class="toast-notification"
-                    @click="handleToastClick(notification)">
+                    @click="handleToastClick(notification)" role="alert">
                     <div class="toast-content">
                         <div class="icon-wrapper">☕</div>
                         <div class="toast-details">
                             <strong class="toast-title">New Order!</strong>
-                            <p class="toast-subtitle">{{ notification.Name }} - {{ notification.Size }}</p>
+                            <p class="toast-subtitle">
+                                #{{ notification.OrderCode }} - {{ notification.Name }} ({{ notification.Size }})
+                            </p>
                         </div>
                     </div>
-                    <button class="close-btn" @click.stop="removeNotification(notification.id)">×</button>
+                    <button class="close-btn" @click.stop="removeNotification(notification.id)"
+                        aria-label="Close notification">
+                        ×
+                    </button>
+                    <div class="toast-progress"></div>
                 </div>
             </transition-group>
         </div>
@@ -33,8 +42,8 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { io } from "socket.io-client";
 import { useAuthStore } from '@/stores/auth';
 
-// --- NEW: Define Emit for Parent Component ---
-const emit = defineEmits(['order-action']);
+// --- FIXED: Define both events here ---
+const emit = defineEmits(['order-action', 'new-order-received']);
 
 const notifications = ref([]);
 const isAudioUnlocked = ref(false);
@@ -46,7 +55,7 @@ const userInfo = authStore.getUserSessionStorage();
 const tenantId = userInfo?.TenantId;
 const userId = userInfo?.EntityItemId;
 
-// --- Method to Unlock Audio (Must be user-initiated) ---
+// Method to Unlock Audio
 const unlockAudio = () => {
     if (alertSound) {
         alertSound.play()
@@ -65,16 +74,16 @@ const handleNewOrder = (orderData) => {
         id: Date.now() + Math.random()
     };
 
-    console.log('notification', notification);
     notifications.value.push(notification);
 
-    // Play sound ONLY if user has interacted/enabled it
+    // --- NEW: Emit to BaristaFlow.vue to refresh the list ---
+    emit('new-order-received', notification);
+
     if (alertSound && isAudioUnlocked.value) {
         alertSound.currentTime = 0;
         alertSound.play().catch(e => console.error("Sound play failed:", e));
     }
 
-    // Auto-remove notification after 8 seconds
     setTimeout(() => {
         removeNotification(notification.id);
     }, 8000);
@@ -84,7 +93,6 @@ const removeNotification = (id) => {
     notifications.value = notifications.value.filter(n => n.id !== id);
 };
 
-// --- NEW: Handle Toast Click ---
 const handleToastClick = (notification) => {
     emit('order-action', notification);
     removeNotification(notification.id);
@@ -92,7 +100,8 @@ const handleToastClick = (notification) => {
 
 onMounted(() => {
     alertSound = new Audio('/sounds/notification.wav');
-    const socketServerUrl = `http://localhost:3008`;
+    // const socketServerUrl = `http://localhost:3008`;
+    const socketServerUrl = `https://eaownyg1ak.execute-api.ap-southeast-1.amazonaws.com/dev`;
     socket = io(socketServerUrl, {
         query: { tenantId, userId }
     });
@@ -108,85 +117,81 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* OVERLAY STYLES - Modernized */
+/* Overlay Styles */
 .audio-unlock-overlay {
     position: fixed;
-    top: 10px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 10000;
-    width: 90%;
-    max-width: 450px;
+    width: calc(100% - 40px);
+    max-width: 480px;
 }
 
 .unlock-box {
-    background: rgba(245, 158, 11, 0.95);
-    /* Semi-transparent Amber */
-    color: white;
-    padding: 12px 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    background: white;
+    color: #1f2937;
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     display: flex;
     align-items: center;
-    gap: 12px;
-    backdrop-filter: blur(5px);
-    font-family: sans-serif;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    gap: 15px;
+    border: 1px solid #e5e7eb;
 }
 
 .unlock-icon {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
+    background: #fef3c7;
+    padding: 10px;
+    border-radius: 12px;
 }
 
-.unlock-text {
+.unlock-content {
     flex-grow: 1;
+}
+
+.unlock-content strong {
+    display: block;
+    font-size: 1rem;
+    color: #b45309;
+}
+
+.unlock-content p {
     margin: 0;
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 0.85rem;
+    color: #6b7280;
 }
 
 .unlock-btn {
-    background: white;
-    color: #d97706;
+    background: #f59e0b;
+    color: white;
     border: none;
-    padding: 6px 14px;
+    padding: 8px 16px;
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.2s;
-    font-size: 0.85rem;
-    white-space: nowrap;
+    transition: background 0.2s;
 }
 
 .unlock-btn:hover {
-    background: #fff8e1;
-    transform: translateY(-1px);
+    background: #d97706;
 }
 
-/* NOTIFICATION STYLES - Beautified & Responsive */
+/* Notification Container */
 .notification-container {
     position: fixed;
-    top: 80px;
-    /* Below overlay */
+    top: 90px;
     right: 20px;
     z-index: 9999;
     width: calc(100% - 40px);
-    max-width: 350px;
+    max-width: 360px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
-/* Mobile responsiveness */
-@media (max-width: 640px) {
-    .notification-container {
-        top: auto;
-        bottom: 20px;
-        right: 50%;
-        transform: translateX(50%);
-    }
-}
-
+/* Toast Card */
 .toast-notification {
     background: white;
     color: #1f2937;
@@ -195,17 +200,17 @@ onUnmounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
-    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f3f4f6;
     cursor: pointer;
-    overflow: hidden;
     position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .toast-notification:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
 }
 
 .toast-content {
@@ -215,10 +220,10 @@ onUnmounted(() => {
 }
 
 .icon-wrapper {
-    font-size: 24px;
+    font-size: 20px;
     background: #f3f4f6;
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -227,6 +232,7 @@ onUnmounted(() => {
 
 .toast-title {
     font-size: 1rem;
+    font-weight: 700;
     color: #111827;
 }
 
@@ -237,38 +243,63 @@ onUnmounted(() => {
 }
 
 .close-btn {
-    background: #f3f4f6;
+    background: transparent;
     border: none;
-    color: #9ca3af;
+    color: #d1d5db;
     cursor: pointer;
-    font-size: 18px;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
+    font-size: 20px;
+    padding: 0 5px;
+    transition: color 0.2s;
 }
 
 .close-btn:hover {
-    background: #fee2e2;
     color: #ef4444;
 }
 
-/* TRANSITION ANIMATIONS - Modern Sliding */
-.fade-enter-active,
-.fade-leave-active {
-    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+/* Progress Bar */
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: #10b981;
+    width: 100%;
+    animation: progress 8s linear forwards;
 }
 
-.fade-enter-from {
+@keyframes progress {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+/* Transitions */
+.toast-enter-active,
+.toast-leave-active {
+    transition: all 0.3s ease;
+}
+
+.toast-enter-from {
     opacity: 0;
-    transform: translateX(50px);
+    transform: translateX(100px);
 }
 
-.fade-leave-to {
+.toast-leave-to {
     opacity: 0;
     transform: scale(0.9);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 640px) {
+    .notification-container {
+        top: auto;
+        bottom: 20px;
+        right: 50%;
+        transform: translateX(50%);
+    }
 }
 </style>
