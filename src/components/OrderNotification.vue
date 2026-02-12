@@ -98,18 +98,18 @@ const handleToastClick = (notification) => {
     removeNotification(notification.id);
 };
 
-onMounted(() => {
-    alertSound = new Audio('/sounds/notification.wav');
-    const socketServerUrl = `http://localhost:3008`;
-    // const socketServerUrl = `https://eaownyg1ak.execute-api.ap-southeast-1.amazonaws.com/dev`;
-    socket = io(socketServerUrl, {
-        query: { tenantId, userId }
-    });
+// onMounted(() => {
+//     alertSound = new Audio('/sounds/notification.wav');
+//     const socketServerUrl = `http://localhost:3008`;
+//     // const socketServerUrl = `https://eaownyg1ak.execute-api.ap-southeast-1.amazonaws.com/dev`;
+//     socket = io(socketServerUrl, {
+//         query: { tenantId, userId }
+//     });
 
-    socket.on("newOrder", (orderData) => {
-        handleNewOrder(orderData);
-    });
-});
+//     socket.on("newOrder", (orderData) => {
+//         handleNewOrder(orderData);
+//     });
+// });
 
 onUnmounted(() => {
     if (socket) socket.disconnect();
