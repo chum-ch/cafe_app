@@ -57,11 +57,10 @@ const authStore = useAuthStore();
 const userInfo = authStore.getUserSessionStorage();
 const tenantId = userInfo?.TenantId;
 const userId = userInfo?.EntityItemId; // Optional, useful for tracking connection
-
 // --- Audio Handling ---
 const unlockAudio = () => {
     // We create the audio object on user interaction to bypass browser autoplay policies
-    alertSound = new Audio('/sounds/notification.mp3'); // Ensure this file exists in /public/sounds/
+    alertSound = new Audio('/public/sounds/notification.mp3'); // Ensure this file exists in /public/sounds/
     alertSound.play()
         .then(() => {
             alertSound.pause();
