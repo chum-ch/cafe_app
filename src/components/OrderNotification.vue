@@ -61,7 +61,7 @@ const userId = userInfo?.EntityItemId; // Optional, useful for tracking connecti
 // --- Audio Handling ---
 const unlockAudio = () => {
     // We create the audio object on user interaction to bypass browser autoplay policies
-    alertSound = new Audio('/sounds/notification.wav'); // Ensure this file exists in /public/sounds/
+    alertSound = new Audio('/sounds/notification.mp3'); // Ensure this file exists in /public/sounds/
     alertSound.play()
         .then(() => {
             alertSound.pause();
