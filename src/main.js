@@ -45,6 +45,12 @@ import InputMask from 'primevue/inputmask';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import ColumnGroup from 'primevue/columngroup';   // optional
+import Row from 'primevue/row';                   // optional
+
+
 import OtpForm from './components/forms/OtpForm.vue';
 import SetAndResetPwd from './components/forms/SetAndResetPwdForm.vue';
 import IconCafe from './components/icons/IconCafe.vue';
@@ -80,6 +86,10 @@ app.component('PriDialog', Dialog)
 app.component('PriInputMask', InputMask)
 app.component('PriInputGroup', InputGroup)
 app.component('PriInputGroupAddon', InputGroupAddon)
+app.component('PriDataTable', DataTable)
+app.component('PriColumn', Column)
+app.component('PriColumnGroup', ColumnGroup)
+app.component('PriRow', Row)
 
 app.component('OtpForm', OtpForm)
 app.component('SetAndResetPwd', SetAndResetPwd)
