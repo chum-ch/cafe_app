@@ -56,7 +56,8 @@ const onFormSubmit = async (e) => {
     <div class="form shadow-2xl rounded-xl w-full max-w-[450px] transition-all duration-300">
       <div class="text-center mb-6">
         <IconCafe class="mx-auto mb-3" :size="80" :color="'var(--bg-cafe-2)'" />
-        <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Create an account</h2>
+        <!-- <PriAvatar image="/imgs/iq1.png" size="sm" shape="circle" class="mx-auto" /> -->
+        <h2 class="text-2xl md:text-3xl font-bold text-slate-800">IQ Coffee</h2>
         <p class="text-slate-500 text-sm px-4">Start your brewing journey with us</p>
       </div>
 

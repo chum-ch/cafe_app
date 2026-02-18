@@ -1,7 +1,6 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { Flame, Snowflake, ShoppingBag, Plus, Droplets, ShoppingCart } from 'lucide-vue-next';
-
 // PrimeVue Component (This is the logic/functionality)
 import Rating from 'primevue/rating';
 const props = defineProps({
@@ -45,7 +44,7 @@ const selectedSugar = ref(CONFIG.sugarLevels[CONFIG.sugarLevels.length - 1]);
 const handleAddToCart = () => {
   const item = {
     ...props.item,
-    size: selectedSize.value,
+    // size: selectedSize.value,
     mood: selectedMood.value,
     sugar: selectedSugar.value
   }
@@ -81,7 +80,7 @@ const handleAddToCart = () => {
           {{ item.name }}
         </h2>
 
-        <div class="flex items-center gap-2 mt-2">
+        <!-- <div class="flex items-center gap-2 mt-2">
           <Rating v-model="item.rating" readonly :cancel="false">
             <template #onicon>
               <span class="text-amber-500">★</span>
@@ -94,14 +93,14 @@ const handleAddToCart = () => {
           <span class="text-stone-500 text-sm font-bold" v-if="item.rating">
             ({{item.rating}})
           </span>
-        </div>
+        </div> -->
       </div>
       <div class="p-4">
         <div class="grid grid-cols-2 flext wrap justify-center gap-4">
           <div class="space-y-3">
             <label
               class="block text-[10px] font-black uppercase tracking-widest  text-center mb-3 text-amber-400">Mood</label>
-            <div class=" flex justify-center gap-3">
+            <div class="flex justify-center gap-4">
               <button v-for="mood in CONFIG.moods" :key="mood.id" @click="selectedMood = mood.id"
                 v-tooltip.top="mood.id === 'hot' ? 'It\'s Hot!' : 'It\'s Cold!'" :class="[
                   selectedMood === mood.id
@@ -117,7 +116,7 @@ const handleAddToCart = () => {
             </div>
           </div>
 
-          <div class="space-y-3">
+          <!-- <div class="space-y-3">
             <label
               class="block text-[10px] font-black uppercase tracking-widest  text-center mb-3 text-amber-400">Size</label>
             <div class="flex justify-center gap-3">
@@ -132,7 +131,7 @@ const handleAddToCart = () => {
                 {{ size }}
               </button>
             </div>
-          </div>
+          </div> -->
         </div>
 
         <div class="space-y-4 my-3">

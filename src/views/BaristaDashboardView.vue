@@ -14,7 +14,6 @@ const userInfo = authStore.getUserSessionStorage();
 const tenantId = userInfo?.TenantId;
 const userId = userInfo?.EntityItemId;
 const orders = ref([]);
-const orderIdCounter = ref(100);
 const draggedOrder = ref(null);
 const workflowSteps = ['pending', 'brewing', 'done']; // 'prep',
 const status = {
@@ -157,7 +156,7 @@ const listOrders = async () => {
                 id: 0,
                 // customer: '',
                 name: o.Name,
-                size: o.Size,
+                // size: o.Size,
                 sugar: o.Sugar,
                 mood: o.Mood.toLowerCase(),
                 status: o.Status.toLowerCase(),
@@ -304,14 +303,14 @@ onUnmounted(() => {
                                         {{ order.mood }}
                                     </span>
                                 </div>
-                                <div class="order-details text-black">
+                                <!-- <div class="order-details text-black">
                                     <label for="">Size</label>
                                     <span v-if="order.size"
                                         class="flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-black uppercase border shadow-sm"
                                         :class="sizeStyles[order.size] || 'bg-stone-100 text-stone-500 border-stone-200'">
                                         {{ order.size }}
                                     </span>
-                                </div>
+                                </div> -->
                                 <div class="order-details text-black">
                                     <label for="">Sugar</label>
                                     <span v-if="order.sugar"
