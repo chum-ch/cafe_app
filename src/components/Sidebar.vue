@@ -5,6 +5,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  SquareMenu,
   Circle,
   Coffee,       // For Barista
 } from 'lucide-vue-next';
@@ -26,6 +27,7 @@ defineEmits(['routeChange']);
 
 const menuItems = [
   { label: 'Users', icon: IconUsers, route: '/users', key: 'users' },
+  { label: 'Menu', icon: SquareMenu, route: '/menu', key: 'menu' },
   { label: 'Barista', icon: Coffee, route: '/barista', key: 'barista' },
   {
     label: 'Inventory',

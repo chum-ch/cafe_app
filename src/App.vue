@@ -111,7 +111,7 @@ const isCollapsedSidebar = ref(true);
               </div>
             </Transition>
 
-            <div class="max-w-7xl mx-auto">
+            <div class="mx-auto">
               <router-view v-slot="{ Component }">
                 <transition name="fade" mode="out-in">
                   <component :is="Component" />

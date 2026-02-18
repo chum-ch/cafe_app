@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, inject } from 'vue';
 // --- PrimeVue Imports ---
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
@@ -9,35 +9,44 @@ import { Search, Filter } from 'lucide-vue-next';
 import CardOrder from '@/components/CardOrder.vue';
 import CartDrawer from './CartDrawer.vue';
 import { ShoppingCart } from 'lucide-vue-next';
+import { useAuthStore } from '@/stores/auth';
+
 // --- Data ---
 const coffees = ref([
-  {
-    id: 1,
-    mood: 'hot',
-    size: 'M',
-    sugar: '30%',
-    quantity: 1000,
-    name: 'Caramel Frappuccino',
-    price: 3.95,
-    category: 'Blended',
-    description: 'Velvety caramel syrup blended with premium coffee and chilled milk.',
-    image: 'https://images.pexels.com/photos/374885/pexels-photo-374885.jpeg?auto=compress&cs=tinysrgb&w=400',
-    popular: true,
-    rating: 4.5
-  },
-  {
-    id: 2,
-    name: 'Midnight Mocha',
-    price: 4.50,
-    category: 'Hot Coffee',
-    description: 'Rich dark chocolate ganache swirled into a double shot of intense espresso.',
-    image: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=400',
-    popular: false,
-    rating: 4.2
-  },
+  // {
+  //   id: 1,
+  //   mood: 'hot',
+  //   size: 'M',
+  //   sugar: '30%',
+  //   quantity: 1000,
+  //   name: 'Caramel Frappuccino',
+  //   price: 3.95,
+  //   category: 'Blended',
+  //   description: 'Velvety caramel syrup blended with premium coffee and chilled milk.',
+  //   image: 'https://images.pexels.com/photos/374885/pexels-photo-374885.jpeg?auto=compress&cs=tinysrgb&w=400',
+  //   popular: true,
+  //   rating: 4.5
+  // },
+  // {
+  //   id: 2,
+  //   name: 'Midnight Mocha',
+  //   price: 4.50,
+  //   category: 'Hot Coffee',
+  //   description: 'Rich dark chocolate ganache swirled into a double shot of intense espresso.',
+  //   image: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=400',
+  //   popular: false,
+  //   rating: 4.2
+  // },
 ]);
 
+const imgDefault = 'https://placehold.co/400x400.png';
 // --- Search & Filter State ---
+const $api = inject('$api');
+const authStore = useAuthStore();
+const userInfo = authStore.getUserSessionStorage();
+const tenantId = userInfo?.TenantId;
+const userId = userInfo?.EntityItemId;
+
 const searchQuery = ref('');
 const selectedSort = ref({ name: 'Most Popular', code: 'popular' });
 
@@ -93,7 +102,7 @@ const cartItems = ref([]);
 const addToCart = (product) => {
   // Reassign ID to prevent duplicate items ID = id+size+mood+sugar
 
-  product.id = product.id + product.size + product.mood + product.sugar;
+  product.id = `${product.id}-${product.mood}-${product.sugar}`;
   const quantity = 1;
   const index = cartItems.value.findIndex(item => item.id === product.id);
   if (index !== -1) {
@@ -127,6 +136,38 @@ const removeItem = (id) => {
 const checkout = (items) => {
   cartItems.value = [];
 };
+
+
+const listMenuItem = async () => {
+  try {
+    const response = await $api.order.listMenu(tenantId, userId);
+    const restrcuturedCoffees = response.data.map(m => {
+      return {
+        id: m.EntityItemId,
+        name: m.Name,
+        price: m.Price,
+        mood: m.Mood,
+        sugar: m.Sugar,
+        quantity: 0,
+        image: m.Image || imgDefault,
+        // category: 'Blended',
+        // description: 'Velvety caramel syrup blended with premium coffee and chilled milk.',
+        // size: 'M',
+        // popular: true,
+        // rating: 4.5
+      }
+    })
+    coffees.value = restrcuturedCoffees;
+    // console.log('Restructured', restrcuturedCoffees);
+  } catch (error) {
+    console.error('Error from list order', error);
+  }
+}
+
+onMounted(async () => {
+  await listMenuItem();
+});
+
 </script>
 
 <template>
@@ -173,9 +214,7 @@ const checkout = (items) => {
     </PriButton>
 
     <CartDrawer :is-open="isCartOpen" :items="cartItems" @close="isCartOpen = false" @update-quantity="updateQuantity"
-      @remove-item="removeItem"
-      @checkout="checkout"
-      />
+      @remove-item="removeItem" @checkout="checkout" />
   </div>
 </template>
 

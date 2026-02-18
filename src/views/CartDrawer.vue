@@ -127,17 +127,17 @@ const checkout = async (items) => {
     // 1. Expand the cart items
     // console.log('expandedItems', expandedItems);
     // const expandedItems = expandCartItems(items);
-
     const restrcuturedCoffees = items.map(coffee => {
         return {
-            Name: coffee.name,
-            Price: coffee.price,
-            Category: coffee.category,
-            Description: coffee.description,
-            Image: coffee.image,
-            Popular: coffee.popular,
-            Rating: coffee.rating,
-            Size: coffee.size,
+            // Name: coffee.name,
+            // Price: coffee.price,
+            // Category: coffee.category,
+            // Description: coffee.description,
+            // Image: coffee.image,
+            // Popular: coffee.popular,
+            // Rating: coffee.rating,
+            // Size: coffee.size,
+            MenuId: coffee.id.split('-')[0],
             Mood: mood[coffee.mood],
             Sugar: coffee.sugar,
             Quantity: coffee.quantity
@@ -170,7 +170,7 @@ const checkout = async (items) => {
                     <div>
                         <h3 class="text-xl font-bold font-black text-stone-900 leading-none">My Cart</h3>
                         <div class="flex gap-2 items-center">
-                            <p class="text-sm"> <span class="text-orange-600 font-black font-bold">{{ items.length
+                            <p class="text-sm text-stone-500"> <span class="text-orange-600 font-black font-bold">{{ items.length
                                     }}</span> {{ pluralize(items.length, 'Item') }}</p>
                             <p class="text-sm text-stone-500"> <span class="text-orange-600 font-black font-bold">{{
                                 totalItemsCount }}</span> {{ pluralize(totalItemsCount, 'Quantity') }}</p>
@@ -199,7 +199,7 @@ const checkout = async (items) => {
                         <div class="relative shrink-0">
                             <img :src="item.image" class="w-28 h-28 rounded-[1.5rem] object-cover shadow-inner" />
                             <div class="absolute -bottom-2 -right-2 px-3 py-1 rounded-full ring-4 ring-white shadow-md"
-                                :class="sizeStyles[item.size] || 'bg-orange-500'">
+                                :class="CONFIG.moods.find(m => m.id === item.mood)?.color || 'bg-orange-500'">
                                 <p class="text-white font-black text-sm tabular-nums">
                                     {{ formatCurrency(item.price) }}
                                 </p>
@@ -220,11 +220,11 @@ const checkout = async (items) => {
                                             {{ item.mood }}
                                         </div>
 
-                                        <div v-if="item.size"
+                                        <!-- <div v-if="item.size"
                                             class="flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-black uppercase border shadow-sm"
                                             :class="sizeStyles[item.size] || 'bg-stone-100 text-stone-500 border-stone-200'">
                                             {{ item.size }}
-                                        </div>
+                                        </div> -->
 
                                         <div v-if="item.sugar"
                                             class="flex items-center px-3 py-1 rounded-full bg-white border border-stone-200 text-stone-500 text-[10px] font-black shadow-sm uppercase">
@@ -242,8 +242,8 @@ const checkout = async (items) => {
                                 <div
                                     class="flex items-center bg-stone-100 rounded-2xl p-2 gap-1 border border-stone-200">
                                     <button @click="handleDecrement(item)" :disabled="toNum(item.quantity) <= 1"
-                                        class="cursor-pointer w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-50 hover:text-indigo-500 transition-all active:scale-90">
-                                        <Minus class="w-5 h-5" />
+                                        class="cursor-pointer w-10 h-10 flex items-center justify-center rounded-xl bg-amber-300 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-90">
+                                        <Minus class="w-5 h-5" color="black" />
                                     </button>
 
                                     <span class="font-black text-center text-xl text-stone-800 text-center p-1">
@@ -252,7 +252,7 @@ const checkout = async (items) => {
 
                                     <button @click="handleIncrement(item)"
                                         class="cursor-pointer w-10 h-10 flex items-center justify-center rounded-xl bg-indigo-400 text-white shadow-md shadow-indigo-200 hover:bg-indigo-600 transition-all active:scale-90">
-                                        <Plus class="w-5 h-5" />
+                                        <Plus class="w-5 h-5" color="black" />
                                     </button>
                                 </div>
 
