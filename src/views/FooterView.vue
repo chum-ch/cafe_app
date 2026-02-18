@@ -10,10 +10,10 @@ import { Coffee, Mail, Phone, Heart } from 'lucide-vue-next';
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-2 text-white font-bold text-lg">
           <IconCafe :color="'#d97706'" />
-          IQ Coffee
+          Niset Cafe Solutions
         </div>
         <p class="text-sm">
-          &copy; {{ new Date().getFullYear() }} Cafe Management Systems. All rights reserved.
+          &copy; {{ new Date().getFullYear() }} Niset Cafe Solutions. All rights reserved.
         </p>
       </div>
 

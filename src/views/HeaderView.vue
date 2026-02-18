@@ -24,7 +24,7 @@ const goToLogin = () => {
           <IconCafe />
         </div>
         <span class="text-2xl font-bold tracking-tight text-slate-900">
-          IQ<span class="text-amber-600"> Coffee</span>
+          Niset<span class="text-amber-600"> Cafe Solutions</span>
         </span>
       </div>
 

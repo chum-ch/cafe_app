@@ -132,7 +132,7 @@ const filteredUsers = computed(() => {
 const listUsers = async () => {
   try {
     const response = await $api.user.listUsers(tenantId);
-    console.log('Response', response.data);
+    // console.log('Response', response.data);
     // Exclude the current user
     const exludedUser = response.data.filter(user => user.Email !== emailLogin);
     // Retstrunct the user list
@@ -171,12 +171,14 @@ const handleCreateUser = async () => {
 };
 const handleDeleteUser = async (id) => {
   try {
+    isSubmitting.value = true;
     const response = await $api.user.deleteUser(id, tenantId);
     // console.log('Response', response);
     listUsers();
   } catch (error) {
     console.error('Error Delete User', error);
   } finally {
+    isSubmitting.value = false;
     showDialogDelete.value = false;
   }
 };
@@ -424,7 +426,10 @@ onMounted(() => {
 
                 <template #footer>
                   <div class="flex justify-end gap-2 pt-4">
-                    <PriButton label="Delete User" icon="pi pi-trash" severity="danger" rounded
+                    <PriButton label="Delete User" icon="pi pi-trash" severity="danger"
+                      :icon="isSubmitting ? 'pi pi-spinner pi-spin' : 'pi pi-trash'"
+                      :disabled="isSubmitting"
+                      size="small"
                       @click="handleDeleteUser(user.id)" />
                   </div>
                 </template>

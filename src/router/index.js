@@ -42,6 +42,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/menu',
+      name: 'menu',
+      component: () => import('../views/MenuCafeView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/barista',
       name: 'barista',
       component: () => import('../views/BaristaDashboardView.vue'),

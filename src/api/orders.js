@@ -8,19 +8,19 @@ if (import.meta.env.VITE_USER_API_URL) {
 
 export default (axios)=>({
     listMenu(tenantId, userId, conf = {}) {
-        return axios.get(`${userApi}/v1/${tenantId}/users/${userId}/menu`, { ...conf, showToast: false });
+        return axios.get(`${userApi}/v1/${tenantId}/users/${userId}/menu`, { ...conf, showToast: false, showLoading: true });
     },
-    createMenu(tenantId, userId, conf = {}) {
-        return axios.post(`${userApi}/v1/${tenantId}/users/${userId}/menu`, { ...conf, showToast: false });
+    createMenu(payload, tenantId, userId, conf = {}) {
+        return axios.post(`${userApi}/v1/${tenantId}/users/${userId}/menu`, payload, { ...conf, showToast: true });
     },
     detailsMenu(tenantId, userId, menuId, conf = {}) {
         return axios.get(`${userApi}/v1/${tenantId}/users/${userId}/menu/${menuId}`, { ...conf, showToast: false });
     },
-    updateMenu(tenantId, userId, menuId, conf = {}) {
-        return axios.patch(`${userApi}/v1/${tenantId}/users/${userId}/menu/${menuId}`, { ...conf, showToast: false });
+    updateMenu(payload, tenantId, userId, menuId, conf = {}) {
+        return axios.patch(`${userApi}/v1/${tenantId}/users/${userId}/menu/${menuId}`, payload, { ...conf, showToast: true });
     },
     deleteMenu(tenantId, userId, menuId, conf = {}) {
-        return axios.delete(`${userApi}/v1/${tenantId}/users/${userId}/menu/${menuId}`, { ...conf, showToast: false });
+        return axios.delete(`${userApi}/v1/${tenantId}/users/${userId}/menu/${menuId}`, { ...conf, showToast: true });
     },
     listOrders(tenantId, userId, conf = {}) {
         return axios.get(`${userApi}/v1/${tenantId}/users/${userId}/orders`, { ...conf, showToast: false });

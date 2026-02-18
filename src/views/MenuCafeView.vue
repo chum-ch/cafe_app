@@ -20,6 +20,7 @@ const roleLogin = userInfo?.Role;
 const dialogVisible = ref(false);
 const isEditing = ref(null);
 const isSubmitting = ref(false);
+const showDialogDelete = ref(false);
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
@@ -107,13 +108,22 @@ const editItem = (item) => {
   dialogVisible.value = true;
 };
 
-const deleteItem = (item) => {
-  menuItems.value = menuItems.value.filter(i => i.id !== item.id);
+const deleteItem = async (menuId) => {
+  try {
+    isSubmitting.value = true;
+    await $api.order.deleteMenu(tenantId, userId, menuId);
+    await listMenuItem();
+  } catch (error) {
+    console.error('Error Delete Menu', error);
+  } finally {
+    showDialogDelete.value = false;
+    isEditing.value = false;
+  }
 };
 
 // --- Form Submission Handler ---
 const onFormSubmit = async (e) => {
-  console.log('Form Submit', e.values);
+  // console.log('Form Submit', e.values);
   // 4. Manual Validation for Price
   if (price.value === null || price.value === 0) {
     priceError.value = 'Price is required and must be greater than 0.';
@@ -134,31 +144,30 @@ const onFormSubmit = async (e) => {
 
   try {
     const payload = {
-      TenantId: tenantId,
+      // TenantId: tenantId,
       ...data,
     }
-    console.log(payload);
+    // console.log('pa', payload);
     if (isEditing.value) {
       // Update existing data
-      console.log(isEditing.value);
+      await $api.order.updateMenu(payload, tenantId, userId, isEditing.value);
     } else {
       // Insert new data
-      menuItems.value.push({ ...data, id: Date.now() });
+      await $api.order.createMenu(payload, tenantId, userId);
     }
-
-    // 1. Close form after successful submission
-    dialogVisible.value = false;
-    formValues.value = getInitialValues();
   } catch (error) {
     console.error('Error saving item', error);
   } finally {
+    // 1. Close form after successful submission
+    dialogVisible.value = false;
+    formValues.value = getInitialValues();
     isSubmitting.value = false;
+    await listMenuItem();
   }
 };
 const listMenuItem = async () => {
   try {
     const response = await $api.order.listMenu(tenantId, userId);
-    console.log('Restructured', response.data);
     menuItems.value = response.data;
   } catch (error) {
     console.error('Error from list order', error);
@@ -209,7 +218,7 @@ onMounted(async () => {
           </span>
         </template>
       </PriColumn>
-      <PriColumn field="Category" header="Category"></PriColumn>
+      <!-- <PriColumn field="Category" header="Category"></PriColumn> -->
       <PriColumn field="Sugar" header="Sugar">
         <template #body="slotProps">
           <div class="flex gap-1 flex-wrap">
@@ -253,7 +262,39 @@ onMounted(async () => {
         <template #body="slotProps">
           <div class="flex gap-2">
             <PriButton icon="pi pi-pencil" severity="info" rounded outlined @click="editItem(slotProps.data)" />
-            <PriButton icon="pi pi-trash" severity="danger" rounded outlined @click="deleteItem(slotProps.data)" />
+            <PriButton icon="pi pi-trash" severity="danger" rounded outlined @click="showDialogDelete = true" />
+
+            <PriDialog v-model:visible="showDialogDelete" modal :draggable="false" dismissableMask
+                class="mx-3 sm:mx-0 w-full max-w-lg">
+                <template #header>
+                  <div class="flex items-center gap-3">
+                    <i class="pi pi-exclamation-triangle text-red-600 dark:text-red-400 text-xl"></i>
+                    <h2 class="text-xl font-bold text-surface-900 dark:text-surface-0 tracking-tight">
+                      Confirm Deletion
+                    </h2>
+                  </div>
+                </template>
+
+                <div class="p-2">
+                  <p class="text-surface-600 dark:text-surface-300">
+                    Are you sure you want to delete the menu
+                    <strong class="font-bold text-indigo-500 dark:text-surface-0">{{ slotProps.data.Name }}</strong>? <br>
+                    This action
+                    <strong class="text-red-600 dark:text-red-400">cannot be undone</strong>.
+                  </p>
+                </div>
+
+                <template #footer>
+                  <div class="flex justify-end">
+                    <PriButton label="Delete" severity="danger"
+                      size="small"
+                      :icon="isSubmitting ? 'pi pi-spinner pi-spin' : 'pi pi-trash'"
+                      :disabled="isSubmitting"
+                      @click="deleteItem(slotProps.data.EntityItemId)" />
+                  </div>
+                </template>
+              </PriDialog>
+
           </div>
         </template>
       </PriColumn>

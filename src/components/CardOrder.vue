@@ -133,20 +133,20 @@ const handleAddToCart = () => {
             </div>
           </div> -->
         </div>
-
-        <div class="space-y-4 my-3">
-          <div class="flex items-center justify-center gap-2">
-            <Droplets size="14" class="text-stone-800" />
+        <div class="space-y-4">
+          <div class="flex items-center justify-center mt-2">
+            <!-- <Droplets size="14" class="text-stone-800" /> -->
             <span class="text-[10px] font-black uppercase tracking-widest mb-2 text-amber-400">Sugar Level</span>
           </div>
           <div class="flex p-1 bg-stone-50 rounded-2xl border border-stone-100">
             <button v-for="level in CONFIG.sugarLevels" :key="level" @click="selectedSugar = level"
-              :class="selectedSugar === level ? 'bg-white text-stone-900 shadow scale-[1.02]' : 'text-stone-400'"
-              class="flex-1 py-2 rounded-xl text-xs font-bold transition-all duration-200">
+              :class="selectedSugar === level ? 'bg-white text-stone-900 shadow scale-[1.05]' : 'text-stone-400'"
+              class="flex-1 mx-2 p-2 rounded-xl text-xs font-bold transition-all duration-200 hover:shadow-md hover:shadow-stone-200 ">
               {{ level }}
             </button>
           </div>
         </div>
+
 
         <PriButton @click="handleAddToCart"
           class="group mt-4 relative w-full bg-stone-900 rounded-2xl overflow-hidden transition-all duration-300 hover:bg-stone-800 active:scale-[0.98] shadow-xl shadow-stone-200">
