@@ -78,7 +78,7 @@ const onFormSubmit = async (e) => {
       
       <div class="text-center mb-6">
         <IconCafe class="mx-auto mb-2" :size="80" :color="'var(--bg-cafe-2)'" />
-        <h2 class="text-2xl md:text-3xl font-bold text-slate-800">IQ Coffee</h2>
+        <h2 class="text-2xl md:text-3xl font-bold text-slate-800"></h2>
         <p class="text-slate-500 text-sm">Please enter your credentials</p>
       </div>
 

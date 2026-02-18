@@ -54,7 +54,7 @@ const onFormSubmit = async (e) => {
     <div class="form shadow-2xl rounded-2xl w-full max-w-md transition-all duration-300">
       <div class="text-center mb-7">
         <IconMail class="mx-auto mb-4" :size="80" :color="'var(--bg-cafe-2)'" />
-        <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Verify Email</h2>
+        <h2 class="text-2xl md:text-3xl font-bold text-slate-800"></h2>
         <p class="text-slate-500 text-sm px-4">
           Enter your email to receive a verification OTP code.
         </p>
