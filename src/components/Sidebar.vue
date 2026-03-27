@@ -14,21 +14,26 @@ import IconSettings from './icons/IconSettings.vue';
 import IconUsers from './icons/IconUsers.vue';
 import IconBox from './icons/IconBox.vue';
 import { useAuthStore } from '@/stores/auth';
+import rules from '@/utils/rule';
 
 const isCollapsed = ref(true);
 const expandedMenus = ref({});
 
+console.log('Rules:', rules); // Debugging line to check rules
 const route = useRoute();
 const router = useRouter();
 const { emit } = getCurrentInstance();
+
 const authStore = useAuthStore();
 const userInfo = authStore.getUserSessionStorage();
+const userRole = userInfo?.Role;
+
 defineEmits(['routeChange']);
 
 const menuItems = [
-  { label: 'Users', icon: IconUsers, route: '/users', key: 'users' },
-  { label: 'Menu', icon: SquareMenu, route: '/menu', key: 'menu' },
-  { label: 'Barista', icon: Coffee, route: '/barista', key: 'barista' },
+  { label: 'Users', icon: IconUsers, route: '/users', key: 'user' },
+  { label: 'Menu', icon: SquareMenu, route: '/menu', key: 'menu'},
+  { label: 'Barista', icon: Coffee, route: '/barista', key: 'barista'},
   {
     label: 'Inventory',
     icon: IconBox,
@@ -39,7 +44,7 @@ const menuItems = [
       { label: 'Stock Out', route: '/inventory/out' },
     ]
   },
-  { label: 'Settings', icon: IconSettings, route: '/settings', key: 'settings' }
+  { label: 'Settings', icon: IconSettings, route: '/settings', key: 'setting' }
 ];
 
 const toggleSidebar = () => {
@@ -104,8 +109,10 @@ const getTooltip = (label) => isCollapsed.value ? { value: label, showDelay: 200
     </div>
 
     <nav class="flex-1 overflow-y-auto px-3 space-y-2">
-      <div v-for="item in menuItems" :key="item.key" class="text-slate-400">
-        <div @click="handleMenuClick(item)" v-tooltip.right="getTooltip(item.label)"
+      <div v-for="item in menuItems" :key="item.key" class="text-slate-400"
+      >
+      <div @click="handleMenuClick(item)" v-tooltip.right="getTooltip(item.label)"
+          v-if="rules.nav[item.key]?.rule?.includes(userRole)"
           class="group mt-2 flex justify-center items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200"
           :class="[isActive(item) ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/40' : 'hover:bg-slate-800 hover:text-white']">
           <component :is="item.icon" :size="20" class="shrink-0 ml-3" />
@@ -121,6 +128,7 @@ const getTooltip = (label) => isCollapsed.value ? { value: label, showDelay: 200
           <div v-if="item.children && !isCollapsed && expandedMenus[item.key]"
             class="mt-1 ml-4 space-y-1 border-l border-slate-700/50 pl-4">
             <router-link v-for="child in item.children" :key="child.label" :to="child.route" @click="isCollapsed = true"
+              
               class="flex items-center gap-3 py-2 text-sm text-slate-400 hover:text-white transition-colors"
               active-class="text-indigo-400 font-bold">
               <Circle :size="6" :class="[route.path === child.route ? 'fill-indigo-400' : 'fill-transparent']" />

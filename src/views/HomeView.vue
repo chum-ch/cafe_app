@@ -10,6 +10,7 @@ import CardOrder from '@/components/CardOrder.vue';
 import CartDrawer from './CartDrawer.vue';
 import { ShoppingCart } from 'lucide-vue-next';
 import { useAuthStore } from '@/stores/auth';
+import rules from '@/utils/rule';
 
 // --- Data ---
 const coffees = ref([
@@ -44,6 +45,8 @@ const imgDefault = 'https://placehold.co/400x400.png';
 const $api = inject('$api');
 const authStore = useAuthStore();
 const userInfo = authStore.getUserSessionStorage();
+const userRole = userInfo?.Role;
+
 const tenantId = userInfo?.TenantId;
 const userId = userInfo?.EntityItemId;
 
@@ -208,6 +211,7 @@ onMounted(async () => {
 
 
     <PriButton @click="isCartOpen = true"
+      v-if="rules.btn.add_to_card?.rule?.includes(userRole)"
       class=" text-white fixed bottom-[12rem] right-4 p-2 shadow-lg shadow-purple-200/50 hover:shadow-purple-200/100 active:scale-95 transition-all duration-300">
       <ShoppingCart class="" />
       <span class="font-bold ">{{ cartItems.length }}</span>

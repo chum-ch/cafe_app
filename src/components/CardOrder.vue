@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 import { Flame, Snowflake, ShoppingBag, Plus, Droplets, ShoppingCart } from 'lucide-vue-next';
+import { useAuthStore } from '@/stores/auth';
+import rules from '@/utils/rule';
 // PrimeVue Component (This is the logic/functionality)
 import Rating from 'primevue/rating';
 const props = defineProps({
@@ -18,7 +20,9 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['add-to-cart']);
-
+const authStore = useAuthStore();
+const userInfo = authStore.getUserSessionStorage();
+const userRole = userInfo?.Role;
 // Configuration Arrays
 const CONFIG = {
   sizes: ['S', 'M', 'L'],
@@ -149,6 +153,7 @@ const handleAddToCart = () => {
 
 
         <PriButton @click="handleAddToCart"
+          v-if="rules.btn.add_to_card?.rule?.includes(userRole)"
           class="group mt-4 relative w-full bg-stone-900 rounded-2xl overflow-hidden transition-all duration-300 hover:bg-stone-800 active:scale-[0.98] shadow-xl shadow-stone-200">
           <div class="relative z-10 flex items-center justify-center gap-4 text-white">
             <!-- <ShoppingBag size="20" class="text-amber-400" /> -->
