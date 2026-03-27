@@ -19,7 +19,6 @@ import rules from '@/utils/rule';
 const isCollapsed = ref(true);
 const expandedMenus = ref({});
 
-console.log('Rules:', rules); // Debugging line to check rules
 const route = useRoute();
 const router = useRouter();
 const { emit } = getCurrentInstance();

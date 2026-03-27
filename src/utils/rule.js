@@ -17,9 +17,9 @@ const rules = {
         barista: {
             rule: [...baseRole, role.barista]
         },
-        inventory: {
-            rule: [...baseRole]
-        },
+        // inventory: {
+        //     rule: [...baseRole]
+        // },
         setting: {
             rule: [...baseRole]
         }
