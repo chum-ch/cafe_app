@@ -43,7 +43,7 @@ const menuItems = [
       { label: 'Stock Out', route: '/inventory/out' },
     ]
   },
-  { label: 'Settings', icon: IconSettings, route: '/settings', key: 'setting' }
+  // { label: 'Settings', icon: IconSettings, route: '/settings', key: 'setting' }
 ];
 
 const toggleSidebar = () => {

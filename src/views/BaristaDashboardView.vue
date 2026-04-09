@@ -217,7 +217,7 @@ onUnmounted(() => {
 
 <template>
     <div class="min-h-screen select-none font-sans overflow-x-hidden">
-        <OrderNotification @new-order-received="onNewOrderDetected" />
+        <!-- <OrderNotification @new-order-received="onNewOrderDetected" />  -->
         <div class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-3xl font-black">

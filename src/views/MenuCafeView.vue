@@ -228,7 +228,7 @@ onMounted(async () => {
       </PriColumn>
       <PriColumn field="Mood" header="Mood">
         <template #body="slotProps">
-          <div class="flex w-full flex-wrap text-center flex justify-center">
+          <div class="flex w-full flex-wrap">
             <h5 class="rounded-full px-3 ring-2 ring-amber-100 mx-1"
               v-for="mood in slotProps.data.Mood" :key="mood.id"
               :class="[CONFIG.moods.find(m => m.id === mood)?.color, CONFIG.moods.find(m => m.id === mood)?.ring]">

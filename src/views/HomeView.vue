@@ -63,13 +63,13 @@ const sortOptions = ref([
 // --- Computed Logic ---
 const filteredCoffees = computed(() => {
   let result = [...coffees.value];
+  console.log('Initial', result);
 
   // 1. Search Filter
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
     result = result.filter(coffee =>
-      coffee.name.toLowerCase().includes(query) ||
-      coffee.category.toLowerCase().includes(query)
+      coffee.name.toLowerCase().includes(query)
     );
   }
 
@@ -156,7 +156,7 @@ const listMenuItem = async () => {
         // category: 'Blended',
         // description: 'Velvety caramel syrup blended with premium coffee and chilled milk.',
         // size: 'M',
-        // popular: true,
+        popular: m.Popular || false,
         // rating: 4.5
       }
     })
