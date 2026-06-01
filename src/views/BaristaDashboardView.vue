@@ -199,7 +199,7 @@ onMounted(() => {
     listOrders();
 
     // Start the 1min API polling
-    startApiPolling();
+    // startApiPolling();
 
     // Start the 1s UI clock
     updateClock();
